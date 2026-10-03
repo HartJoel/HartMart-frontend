@@ -1,0 +1,25 @@
+node_modules/
+dist/
+build/
+.cache/
+.env*
+!.env.example
+.vite/
+vite.config.*.timestamp-*
+*.tsbuildinfo
+*-debug.log*
+logs/
+*.log
+.claude-replay.*
+.tmp-*
+
+# Platform-managed agent state, not project source.
+/.plugins/
+/.opencode-skills/
+
+# AI assistant instructions, skills and reference docs. Kept local, not pushed.
+.claude/
+CLAUDE.md
+AGENTS.md
+claude/
+docs/

@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  --color-hm-background: #fafafa;
+  --color-hm-surface: #ffffff;
+  --color-hm-text: #1a1a1a;
+  --color-hm-muted: #71717a;
+  --color-hm-accent: #4f46e5;
+  --color-hm-accent-dark: #4338ca;
+  --color-hm-border: #e4e4e7;
+  --color-hm-field: #f4f4f5;
+  --color-hm-success: #23835a;
+  --color-hm-error: #c83e4d;
+  --color-hm-error-soft: #fff6f6;
+
+  --radius-hm-sm: 12px;
+  --radius-hm-md: 16px;
+}
+
+@layer base {
+  html {
+    @apply bg-hm-background text-hm-text;
+  }
+
+  body {
+    @apply min-w-[320px];
+  }
+
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 3px solid rgba(79, 70, 229, 0.24);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
