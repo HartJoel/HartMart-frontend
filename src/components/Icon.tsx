@@ -16,6 +16,7 @@ export type IconName =
   | "reports"
   | "search"
   | "shop"
+  | "star"
   | "users"
   | "vendors";
 
@@ -72,6 +73,7 @@ const paths: Record<IconName, ReactNode> = {
       <path d="M5.5 12.5V20h13v-7.5M10 20v-4.5h4V20" />
     </>
   ),
+  star: <path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8L12 3.5Z" />,
   users: (
     <>
       <circle cx="9" cy="8" r="3.5" />

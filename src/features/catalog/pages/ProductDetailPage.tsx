@@ -2,11 +2,11 @@ import { useState } from "react";
 import { Link, useParams } from "react-router";
 import Button from "@/components/Button";
 import QuantityStepper from "@/components/QuantityStepper";
-import { sectionHeadClass } from "@/features/catalog/styles";
+import Rating from "@/components/Rating";
+import ProductReviews from "@/features/catalog/components/ProductReviews";
 import { formatNaira } from "@/lib/format";
 import { products } from "@/lib/mock/products";
-
-const reviews = ["Clean sound, excellent fit.", "Great for my daily commute.", "Worth every naira."];
+import { reviewSummary } from "@/lib/mock/reviews";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -42,7 +42,12 @@ export default function ProductDetailPage() {
             {product.vendor}
           </small>
           <h1 className="my-4 text-[clamp(42px,5vw,68px)] leading-none tracking-[-0.06em]">{product.name}</h1>
-          <p className="text-[11px] leading-[1.7] text-hm-muted">★★★★★ &nbsp; 4.8 · 126 reviews</p>
+          <div className="flex items-center gap-2.5 text-[11px] text-hm-muted">
+            <Rating value={reviewSummary.average} size={12} />
+            <span>
+              {reviewSummary.average.toFixed(1)} · {reviewSummary.count} reviews
+            </span>
+          </div>
           <div className="mt-10 mb-6 flex items-center gap-4">
             <b className="text-[30px] text-hm-accent">{formatNaira(product.price)}</b>
             <del className="text-hm-muted">₦24,000</del>
@@ -80,25 +85,7 @@ export default function ProductDetailPage() {
         </section>
       </div>
 
-      <section className="pt-[100px]">
-        <div className={sectionHeadClass}>
-          <h2 className="m-0 text-[32px] tracking-[-0.045em]">Customer reviews</h2>
-        </div>
-        {reviews.map((review) => (
-          <article
-            key={review}
-            className="grid grid-cols-[160px_1fr] border-t border-hm-border py-7 max-[600px]:grid-cols-1"
-          >
-            <b>★★★★★</b>
-            <div>
-              <strong>{review}</strong>
-              <p className="text-hm-muted">
-                Verified purchase · The product arrived quickly and performs beautifully.
-              </p>
-            </div>
-          </article>
-        ))}
-      </section>
+      <ProductReviews />
     </>
   );
 }
