@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Link, NavLink } from "react-router";
+import RoleSwitcher from "@/features/auth/components/RoleSwitcher";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
 import { cn } from "@/lib/cn";
 
@@ -16,44 +17,48 @@ export default function AccountShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="grid grid-cols-[200px_1fr] gap-[70px] max-[900px]:gap-10 max-[600px]:grid-cols-1">
-      <nav aria-label="Account" className="flex flex-col pt-20 max-[600px]:flex-row max-[600px]:overflow-x-auto max-[600px]:pt-5">
-        {navigation.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.end}
-            className={({ isActive }) =>
-              cn(
-                "flex items-center justify-between gap-3 rounded-[10px] p-3 text-[13px] no-underline transition-colors duration-200 max-[600px]:min-w-max",
-                isActive ? "bg-hm-text text-white" : "text-hm-muted hover:bg-hm-field hover:text-hm-text",
-              )
-            }
+      <div className="flex flex-col pt-20 max-[600px]:pt-5">
+        <RoleSwitcher tone="light" className="mb-4 max-[600px]:mb-3" />
+
+        <nav aria-label="Account" className="flex flex-col max-[600px]:flex-row max-[600px]:overflow-x-auto">
+          {navigation.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center justify-between gap-3 rounded-[10px] p-3 text-[13px] no-underline transition-colors duration-200 max-[600px]:min-w-max",
+                  isActive ? "bg-hm-text text-white" : "text-hm-muted hover:bg-hm-field hover:text-hm-text",
+                )
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <span>{item.label}</span>
+                  {item.to === "/notifications" && unreadCount > 0 && (
+                    <span
+                      aria-label={`${unreadCount} unread`}
+                      className={cn(
+                        "grid h-5 min-w-5 place-items-center rounded-full px-1.5 text-[10px] font-[650]",
+                        isActive ? "bg-white text-hm-text" : "bg-hm-accent text-white",
+                      )}
+                    >
+                      {unreadCount}
+                    </span>
+                  )}
+                </>
+              )}
+            </NavLink>
+          ))}
+          <Link
+            to="/login"
+            className="mt-3 rounded-[10px] p-3 text-[13px] font-[600] text-hm-error no-underline transition-colors duration-200 hover:bg-hm-error-soft max-[600px]:mt-0 max-[600px]:min-w-max"
           >
-            {({ isActive }) => (
-              <>
-                <span>{item.label}</span>
-                {item.to === "/notifications" && unreadCount > 0 && (
-                  <span
-                    aria-label={`${unreadCount} unread`}
-                    className={cn(
-                      "grid h-5 min-w-5 place-items-center rounded-full px-1.5 text-[10px] font-[650]",
-                      isActive ? "bg-white text-hm-text" : "bg-hm-accent text-white",
-                    )}
-                  >
-                    {unreadCount}
-                  </span>
-                )}
-              </>
-            )}
-          </NavLink>
-        ))}
-        <Link
-          to="/login"
-          className="mt-3 rounded-[10px] p-3 text-[13px] font-[600] text-hm-error no-underline transition-colors duration-200 hover:bg-hm-error-soft max-[600px]:min-w-max max-[600px]:mt-0"
-        >
-          Logout
-        </Link>
-      </nav>
+            Logout
+          </Link>
+        </nav>
+      </div>
 
       <section className="min-w-0">{children}</section>
     </div>

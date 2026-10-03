@@ -3,6 +3,7 @@ import { Link, NavLink } from "react-router";
 import Brand from "@/components/Brand";
 import { buttonClasses } from "@/components/Button";
 import Icon, { type IconName } from "@/components/Icon";
+import { useSession } from "@/features/auth/SessionContext";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
 import { cn } from "@/lib/cn";
 import { useMotionPresets } from "@/lib/motion";
@@ -61,6 +62,7 @@ function HeaderIconLink({
 
 export default function Header() {
   const { unreadCount } = useNotifications();
+  const { roles } = useSession();
 
   return (
     <header className="flex min-h-[82px] items-center gap-10 border-b border-hm-border bg-[rgba(250,250,250,0.9)] px-[clamp(20px,5vw,72px)] py-4 max-[600px]:gap-4">
@@ -69,18 +71,47 @@ export default function Header() {
         Search products and vendors
       </div>
       <nav aria-label="Primary" className="ml-auto flex items-center gap-2 max-[600px]:gap-1">
-        <Link
-          to="/become-a-vendor"
-          aria-label="Become a vendor"
-          className={buttonClasses({
-            variant: "ghost",
-            size: "sm",
-            className: "mr-3 max-[900px]:min-h-10 max-[900px]:px-3 max-[600px]:mr-1",
-          })}
-        >
-          <Icon name="vendors" size={16} />
-          <span className="max-[900px]:sr-only">Become a vendor</span>
-        </Link>
+        {roles.includes("VENDOR") ? (
+          <Link
+            to="/vendor/dashboard"
+            aria-label="Vendor dashboard"
+            className={buttonClasses({
+              variant: "ghost",
+              size: "sm",
+              className: "max-[900px]:min-h-10 max-[900px]:px-3",
+            })}
+          >
+            <Icon name="dashboard" size={16} />
+            <span className="max-[900px]:sr-only">Vendor dashboard</span>
+          </Link>
+        ) : (
+          <Link
+            to="/become-a-vendor"
+            aria-label="Become a vendor"
+            className={buttonClasses({
+              variant: "ghost",
+              size: "sm",
+              className: "mr-3 max-[900px]:min-h-10 max-[900px]:px-3 max-[600px]:mr-1",
+            })}
+          >
+            <Icon name="vendors" size={16} />
+            <span className="max-[900px]:sr-only">Become a vendor</span>
+          </Link>
+        )}
+        {roles.includes("ADMIN") && (
+          <Link
+            to="/admin"
+            aria-label="Admin"
+            className={buttonClasses({
+              variant: "ghost",
+              size: "sm",
+              className: "mr-3 max-[900px]:min-h-10 max-[900px]:px-3 max-[600px]:mr-1",
+            })}
+          >
+            <Icon name="users" size={16} />
+            <span className="max-[900px]:sr-only">Admin</span>
+          </Link>
+        )}
         {navItems.map((item) => (
           <HeaderIconLink
             key={item.to}
