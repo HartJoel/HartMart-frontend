@@ -1,24 +1,27 @@
 import { Outlet, useLocation } from "react-router";
-import Icon from "@/components/Icon";
 import PageTransition from "@/components/PageTransition";
 import WorkspaceSidebar, { type WorkspaceNavItem } from "@/components/WorkspaceSidebar";
+import NotificationBell from "@/features/notifications/components/NotificationBell";
+import { useNotifications } from "@/features/notifications/NotificationsContext";
 import { cn } from "@/lib/cn";
 import { getInitials } from "@/lib/format";
 import { sessionUser } from "@/lib/mock/session";
 
-const navigation: WorkspaceNavItem[] = [
-  { to: "/admin", label: "Dashboard", icon: "dashboard", end: true },
-  { to: "/admin/users", label: "Users", icon: "users" },
-  { to: "/admin/vendors", label: "Vendors", icon: "vendors" },
-  { to: "/admin/categories", label: "Categories", icon: "categories" },
-  { to: "/admin/reports", label: "Reports", icon: "reports" },
-  { to: "/admin/logs", label: "Logs", icon: "logs" },
-];
-
 export default function AdminLayout() {
   const { pathname } = useLocation();
+  const { unreadCount } = useNotifications();
   // The audit log is a wide table, so it drops the content width cap.
   const isLogs = pathname === "/admin/logs";
+
+  const navigation: WorkspaceNavItem[] = [
+    { to: "/admin", label: "Dashboard", icon: "dashboard", end: true },
+    { to: "/admin/users", label: "Users", icon: "users" },
+    { to: "/admin/vendors", label: "Vendors", icon: "vendors" },
+    { to: "/admin/categories", label: "Categories", icon: "categories" },
+    { to: "/admin/reports", label: "Reports", icon: "reports" },
+    { to: "/admin/logs", label: "Logs", icon: "logs" },
+    { to: "/admin/notifications", label: "Notifications", icon: "bell", badge: unreadCount },
+  ];
 
   return (
     <div className="grid min-h-screen grid-cols-[244px_minmax(0,1fr)] max-[760px]:block">
@@ -31,9 +34,12 @@ export default function AdminLayout() {
       <div className="min-w-0">
         <header className="flex min-h-[76px] items-center justify-between border-b border-hm-text/[0.06] px-[clamp(24px,4vw,56px)] max-[760px]:min-h-[68px]">
           <span className="text-[13px] font-[700] max-[760px]:block">HartMart Admin</span>
-          <div className="flex items-center gap-2 text-[9px] font-[650] text-hm-muted">
-            <span className="size-1.5 rounded-full bg-hm-success" />
-            Production
+          <div className="flex items-center gap-5">
+            <NotificationBell to="/admin/notifications" />
+            <div className="flex items-center gap-2 text-[9px] font-[650] text-hm-muted">
+              <span className="size-1.5 rounded-full bg-hm-success" />
+              Production
+            </div>
           </div>
         </header>
         <div

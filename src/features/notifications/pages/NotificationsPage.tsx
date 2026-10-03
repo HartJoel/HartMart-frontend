@@ -9,7 +9,12 @@ import { formatRelativeTime } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import type { Notification } from "@/types/notification";
 
-export default function NotificationsPage() {
+type NotificationsPageProps = {
+  /** Vendor and admin areas show the list inside their own shell; the default is the customer account. */
+  area?: "vendor" | "admin";
+};
+
+export default function NotificationsPage({ area }: NotificationsPageProps) {
   const { notifications, unreadCount, markAllRead } = useNotifications();
 
   const description =
@@ -17,9 +22,14 @@ export default function NotificationsPage() {
       ? `You have ${unreadCount} unread ${unreadCount === 1 ? "notification" : "notifications"}.`
       : "You're all caught up.";
 
-  return (
-    <AccountShell>
-      <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Account", to: "/account" }, { label: "Notifications" }]} />
+  const dashboard = area === "vendor" ? "/vendor/dashboard" : "/admin";
+  const breadcrumbs = area
+    ? [{ label: "Dashboard", to: dashboard }, { label: "Notifications" }]
+    : [{ label: "Home", to: "/" }, { label: "Account", to: "/account" }, { label: "Notifications" }];
+
+  const content = (
+    <>
+      <Breadcrumbs items={breadcrumbs} />
       <PageHeader
         eyebrow="INBOX"
         title="Notifications"
@@ -39,8 +49,11 @@ export default function NotificationsPage() {
             <Icon name="bell" size={18} />
           </span>
           <p className="m-0 text-[13px] text-hm-muted">No notifications right now.</p>
-          <Link to="/products" className={buttonClasses({ variant: "ghost", size: "sm" })}>
-            Continue shopping
+          <Link
+            to={area ? dashboard : "/products"}
+            className={buttonClasses({ variant: "ghost", size: "sm" })}
+          >
+            {area ? "Back to dashboard" : "Continue shopping"}
           </Link>
         </div>
       ) : (
@@ -50,8 +63,10 @@ export default function NotificationsPage() {
           ))}
         </ul>
       )}
-    </AccountShell>
+    </>
   );
+
+  return area ? content : <AccountShell>{content}</AccountShell>;
 }
 
 function NotificationItem({ item }: { item: Notification }) {

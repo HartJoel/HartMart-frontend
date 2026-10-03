@@ -36,18 +36,19 @@ export const initialApplications: VendorApplication[] = [
   { id: 3, store: "Scent House Lagos", owner: "Dara Phillips", date: "17 Jun 2025", category: "Beauty", rc: "RC 9401288", location: "Ikoyi, Lagos" },
 ];
 
-export type Category = { id: number; name: string; depth: 0 | 1; products: number };
+/** A top-level category has no parent. Subcategories point at one top-level category. */
+export type Category = { id: number; name: string; parentId: number | null; products: number };
 
 export const initialCategories: Category[] = [
-  { id: 1, name: "Electronics", depth: 0, products: 2840 },
-  { id: 2, name: "Audio", depth: 1, products: 640 },
-  { id: 3, name: "Computers", depth: 1, products: 812 },
-  { id: 4, name: "Fashion & Apparel", depth: 0, products: 4128 },
-  { id: 5, name: "Women’s Fashion", depth: 1, products: 1840 },
-  { id: 6, name: "Men’s Fashion", depth: 1, products: 1612 },
-  { id: 7, name: "Home & Living", depth: 0, products: 1950 },
-  { id: 8, name: "Kitchenware", depth: 1, products: 720 },
-  { id: 9, name: "Beauty", depth: 0, products: 1104 },
+  { id: 1, name: "Electronics", parentId: null, products: 2840 },
+  { id: 2, name: "Audio", parentId: 1, products: 640 },
+  { id: 3, name: "Computers", parentId: 1, products: 812 },
+  { id: 4, name: "Fashion & Apparel", parentId: null, products: 4128 },
+  { id: 5, name: "Women’s Fashion", parentId: 4, products: 1840 },
+  { id: 6, name: "Men’s Fashion", parentId: 4, products: 1612 },
+  { id: 7, name: "Home & Living", parentId: null, products: 1950 },
+  { id: 8, name: "Kitchenware", parentId: 7, products: 720 },
+  { id: 9, name: "Beauty", parentId: null, products: 1104 },
 ];
 
 export const auditLogs = [

@@ -9,6 +9,8 @@ export type WorkspaceNavItem = {
   label: string;
   icon: IconName;
   end?: boolean;
+  /** Unread count shown on the item. Hidden when zero or unset. */
+  badge?: number;
 };
 
 type WorkspaceSidebarProps = {
@@ -54,6 +56,12 @@ export default function WorkspaceSidebar({ subtitle, navLabel, navigation, ident
             >
               <Icon name={item.icon} size={17} />
               {item.label}
+              {item.badge ? (
+                <span className="ml-auto grid h-5 min-w-5 place-items-center rounded-full bg-hm-accent px-1.5 text-[10px] font-[650] text-white">
+                  {item.badge}
+                  <span className="sr-only"> unread</span>
+                </span>
+              ) : null}
             </NavLink>
           ))}
         </nav>
