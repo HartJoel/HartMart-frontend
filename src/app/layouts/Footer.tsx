@@ -11,6 +11,9 @@ export default function Footer() {
         <Link className={linkClass} to="/products">
           Shop
         </Link>
+        <Link className={linkClass} to="/vendors">
+          Vendors
+        </Link>
         <Link className={linkClass} to="/become-a-vendor">
           Sell
         </Link>

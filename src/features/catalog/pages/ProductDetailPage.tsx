@@ -8,15 +8,12 @@ import ProductReviews from "@/features/catalog/components/ProductReviews";
 import { formatNaira } from "@/lib/format";
 import { products } from "@/lib/mock/products";
 import { reviewSummary } from "@/lib/mock/reviews";
+import { findVendor } from "@/lib/mock/vendors";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
   const product = products.find((item) => item.id === Number(id)) ?? products[0];
-  const initials = product.vendor
-    .split(" ")
-    .map((word) => word[0])
-    .slice(0, 2)
-    .join("");
+  const vendor = findVendor(product.vendorId);
   const [quantity, setQuantity] = useState(1);
   const [stock, setStock] = useState(true);
 
@@ -73,18 +70,24 @@ export default function ProductDetailPage() {
               ♡
             </Button>
           </div>
-          <article className="mt-12 flex items-center gap-3.5 rounded-hm-md bg-hm-surface p-6">
-            <span className="grid size-[46px] place-items-center rounded-full bg-hm-text text-[11px] text-white">
-              {initials}
-            </span>
-            <div>
-              <strong>{product.vendor}</strong>
-              <small className="mt-1 block text-hm-muted">Smart tech for everyday living.</small>
-            </div>
-            <Link className="ml-auto text-[11px] text-hm-accent no-underline" to="/products">
-              Visit storefront
-            </Link>
-          </article>
+
+          {vendor && (
+            <article className="mt-12 flex items-center gap-3.5 rounded-hm-md bg-hm-surface p-6">
+              <span
+                aria-hidden="true"
+                className="grid size-[46px] shrink-0 place-items-center rounded-full bg-hm-text text-[11px] text-white"
+              >
+                {vendor.initials}
+              </span>
+              <div className="min-w-0">
+                <strong>{vendor.name}</strong>
+                <small className="mt-1 block text-hm-muted">{vendor.tagline}</small>
+              </div>
+              <Link className="ml-auto shrink-0 text-[11px] text-hm-accent no-underline" to={`/vendors/${vendor.id}`}>
+                Visit storefront
+              </Link>
+            </article>
+          )}
         </section>
       </div>
 

@@ -31,6 +31,8 @@ import VendorProductFormPage from "@/features/vendor-dashboard/pages/ProductForm
 import VendorProductsPage from "@/features/vendor-dashboard/pages/ProductsPage";
 import VendorReviewsPage from "@/features/vendor-dashboard/pages/ReviewsPage";
 import VendorSettingsPage from "@/features/vendor-dashboard/pages/SettingsPage";
+import VendorDirectoryPage from "@/features/vendor-storefront/pages/VendorDirectoryPage";
+import VendorStorefrontPage from "@/features/vendor-storefront/pages/VendorStorefrontPage";
 
 export const router = createBrowserRouter([
   {
@@ -71,6 +73,8 @@ export const router = createBrowserRouter([
           { path: "/account", element: <ProfilePage /> },
           { path: "/account/addresses", element: <AddressesPage /> },
           { path: "/notifications", element: <NotificationsPage /> },
+          { path: "/vendors", element: <VendorDirectoryPage /> },
+          { path: "/vendors/:id", element: <VendorStorefrontPage /> },
         ],
       },
 
