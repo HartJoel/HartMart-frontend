@@ -1,4 +1,4 @@
-import Button from "@/components/Button";
+import OrderReviews from "@/features/reviews/components/OrderReviews";
 import Icon from "@/components/Icon";
 import StatusBadge from "@/components/StatusBadge";
 import { formatDate, formatNaira } from "@/lib/format";
@@ -90,15 +90,7 @@ export default function OrderDetails({ order }: { order: Order }) {
         </dl>
       </section>
 
-      {order.status === "Delivered" && (
-        <article className="flex flex-wrap items-center justify-between gap-4 rounded-hm-md bg-hm-text p-6 text-white">
-          <div>
-            <h3 className="m-0 text-[14px] font-[650]">How was your order?</h3>
-            <p className="m-0 mt-1 text-[12px] text-[#aaa]">Your feedback helps independent vendors grow.</p>
-          </div>
-          <Button size="sm">Leave a review</Button>
-        </article>
-      )}
+      {order.status === "Delivered" && <OrderReviews order={order} />}
     </div>
   );
 }

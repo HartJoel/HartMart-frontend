@@ -10,6 +10,13 @@ export type Review = {
   verified: boolean;
 };
 
+/** What the shopper submits from the review form. */
+export type ReviewInput = {
+  rating: number;
+  title: string;
+  body: string;
+};
+
 export type ReviewSummary = {
   /** Average rating out of 5. */
   average: number;

@@ -3,6 +3,9 @@ import { useEffect, useRef, type RefObject } from "react";
 const focusableSelector =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
+// Open dialogs, in the order they opened. Only the top one reacts to keys, so a modal opened from a drawer closes alone.
+const openDialogs: HTMLElement[] = [];
+
 /**
  * Keyboard behaviour for a modal or drawer: focus moves inside on open, Tab cannot leave
  * the dialog, Escape closes it, and focus returns to the trigger when it closes.
@@ -21,9 +24,12 @@ export function useDialog(ref: RefObject<HTMLElement | null>, onClose: () => voi
     const trigger = document.activeElement as HTMLElement | null;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    openDialogs.push(dialog);
     (dialog.querySelector<HTMLElement>(focusableSelector) ?? dialog).focus();
 
     function onKeyDown(event: KeyboardEvent) {
+      if (openDialogs[openDialogs.length - 1] !== dialog) return;
+
       if (event.key === "Escape") {
         onCloseRef.current();
         return;
@@ -48,6 +54,7 @@ export function useDialog(ref: RefObject<HTMLElement | null>, onClose: () => voi
 
     return () => {
       document.removeEventListener("keydown", onKeyDown);
+      openDialogs.splice(openDialogs.indexOf(dialog), 1);
       document.body.style.overflow = previousOverflow;
       trigger?.focus();
     };
