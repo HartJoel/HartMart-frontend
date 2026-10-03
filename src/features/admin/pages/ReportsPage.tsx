@@ -1,5 +1,6 @@
 import { useState, type ChangeEvent } from "react";
 import PageHeader from "@/components/PageHeader";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { revenueBars } from "@/features/admin/mock";
 
 const metrics = [
@@ -14,6 +15,7 @@ export default function ReportsPage() {
 
   return (
     <>
+      <Breadcrumbs items={[{ label: "Dashboard", to: "/admin" }, { label: "Reports" }]} />
       <PageHeader
         eyebrow="ANALYTICS"
         title="Reports"

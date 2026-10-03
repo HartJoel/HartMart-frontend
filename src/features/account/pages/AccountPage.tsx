@@ -4,6 +4,7 @@ import Button from "@/components/Button";
 import Field from "@/components/Field";
 import Input from "@/components/Input";
 import PageHeader from "@/components/PageHeader";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { cn } from "@/lib/cn";
 
 const navigation = [
@@ -42,6 +43,8 @@ export default function AccountPage({ addresses = false }: { addresses?: boolean
       </aside>
 
       <section>
+        <Breadcrumbs items={addresses ? [{ label: "Home", to: "/" }, { label: "Account", to: "/account" }, { label: "Addresses" }] : [{ label: "Home", to: "/" }, { label: "Account" }]} />
+
         {addresses ? (
           <>
             <PageHeader

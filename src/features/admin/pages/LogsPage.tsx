@@ -1,11 +1,13 @@
 import DataTable, { tableCell, tableHeadCell } from "@/components/DataTable";
 import PageHeader from "@/components/PageHeader";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { cn } from "@/lib/cn";
 import { auditLogs } from "@/features/admin/mock";
 
 export default function LogsPage() {
   return (
     <>
+      <Breadcrumbs items={[{ label: "Dashboard", to: "/admin" }, { label: "Logs" }]} />
       <PageHeader
         eyebrow="AUDIT TRAIL"
         title="System logs"

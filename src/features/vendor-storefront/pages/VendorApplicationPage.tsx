@@ -4,6 +4,7 @@ import Button, { buttonClasses } from "@/components/Button";
 import Field from "@/components/Field";
 import Input from "@/components/Input";
 import PageHeader from "@/components/PageHeader";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import ResultScreen from "@/components/ResultScreen";
 import { cn } from "@/lib/cn";
 
@@ -43,6 +44,7 @@ export default function VendorApplicationPage() {
 
   return (
     <>
+      <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Become a vendor" }]} />
       <PageHeader
         variant="storefront"
         eyebrow="SELL ON HARTMART"

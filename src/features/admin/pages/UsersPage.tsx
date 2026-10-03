@@ -2,6 +2,7 @@ import { useMemo, useState, type ChangeEvent } from "react";
 import { AnimatePresence } from "framer-motion";
 import DataTable, { tableCell, tableHeadCell } from "@/components/DataTable";
 import PageHeader from "@/components/PageHeader";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import StatusBadge from "@/components/StatusBadge";
 import { cn } from "@/lib/cn";
 import Icon from "@/components/Icon";
@@ -31,6 +32,7 @@ export default function UsersPage() {
 
   return (
     <>
+      <Breadcrumbs items={[{ label: "Dashboard", to: "/admin" }, { label: "Users" }]} />
       <PageHeader
         eyebrow="ACCESS & IDENTITY"
         title="Users"

@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent, type KeyboardEvent, type ReactNode } from "react";
 import Button from "@/components/Button";
 import PageHeader from "@/components/PageHeader";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { cn } from "@/lib/cn";
 import Icon from "@/components/Icon";
 import { initialCategories, type Category } from "@/features/admin/mock";
@@ -35,6 +36,7 @@ export default function CategoriesPage() {
 
   return (
     <>
+      <Breadcrumbs items={[{ label: "Dashboard", to: "/admin" }, { label: "Categories" }]} />
       <PageHeader
         eyebrow="CATALOG STRUCTURE"
         title="Categories"

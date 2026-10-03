@@ -2,6 +2,7 @@ import { useState, type ChangeEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Button from "@/components/Button";
 import PageHeader from "@/components/PageHeader";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { cn } from "@/lib/cn";
 import { useMotionPresets } from "@/lib/motion";
 import ProductCard from "@/features/catalog/components/ProductCard";
@@ -18,6 +19,7 @@ export default function ProductsPage() {
 
   return (
     <>
+      <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Products" }]} />
       <PageHeader
         variant="storefront"
         eyebrow="CATALOG"

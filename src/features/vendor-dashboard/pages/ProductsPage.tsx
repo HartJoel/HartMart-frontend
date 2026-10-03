@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { buttonClasses } from "@/components/Button";
 import DataTable, { tableCell, tableHeadCell } from "@/components/DataTable";
 import PageHeader from "@/components/PageHeader";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { cn } from "@/lib/cn";
 import { vendorProducts } from "@/features/vendor-dashboard/mock";
 
@@ -10,6 +11,7 @@ const lowStockThreshold = 6;
 export default function ProductsPage() {
   return (
     <>
+      <Breadcrumbs items={[{ label: "Dashboard", to: "/vendor/dashboard" }, { label: "Products" }]} />
       <PageHeader
         eyebrow="INVENTORY"
         title="Products"

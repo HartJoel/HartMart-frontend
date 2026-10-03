@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { buttonClasses } from "@/components/Button";
 import PageHeader from "@/components/PageHeader";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import QuantityStepper from "@/components/QuantityStepper";
 import ResultScreen from "@/components/ResultScreen";
 import { formatNaira } from "@/lib/format";
@@ -49,6 +50,7 @@ export default function CartPage() {
 
   return (
     <>
+      <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Cart" }]} />
       <PageHeader
         variant="storefront"
         eyebrow="YOUR SELECTION"

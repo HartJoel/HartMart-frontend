@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import Button from "@/components/Button";
 import PageHeader from "@/components/PageHeader";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import Icon from "@/components/Icon";
 import RejectApplicationModal from "@/features/admin/components/RejectApplicationModal";
 import { initialApplications, type VendorApplication } from "@/features/admin/mock";
@@ -16,6 +17,7 @@ export default function VendorsPage() {
 
   return (
     <>
+      <Breadcrumbs items={[{ label: "Dashboard", to: "/admin" }, { label: "Vendors" }]} />
       <PageHeader
         eyebrow="TRUST & SAFETY"
         title="Vendor moderation"

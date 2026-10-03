@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router";
 import Button from "@/components/Button";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import QuantityStepper from "@/components/QuantityStepper";
 import Rating from "@/components/Rating";
 import ProductReviews from "@/features/catalog/components/ProductReviews";
@@ -21,6 +22,8 @@ export default function ProductDetailPage() {
 
   return (
     <>
+      <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Products", to: "/products" }, { label: product.name }]} />
+
       <div className="grid grid-cols-[1.1fr_0.9fr] items-start gap-[7vw] pt-10 max-[900px]:grid-cols-1">
         <div>
           <img className="block aspect-square w-full rounded-hm-md object-cover" src={product.image} alt={product.name} />

@@ -1,4 +1,5 @@
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import Button from "@/components/Button";
 import Field from "@/components/Field";
 import Input from "@/components/Input";
@@ -7,11 +8,13 @@ import PageHeader from "@/components/PageHeader";
 const priceFields = ["Base price", "Discount price", "Stock", "Reorder level"];
 
 export default function ProductFormPage() {
+  const { id } = useParams();
   const navigate = useNavigate();
   const backToProducts = () => navigate("/vendor/products");
 
   return (
     <>
+      <Breadcrumbs items={[{ label: "Dashboard", to: "/vendor/dashboard" }, { label: "Products", to: "/vendor/products" }, { label: id ? "Edit product" : "New product" }]} />
       <PageHeader
         eyebrow="NEW PRODUCT"
         title="Add a product"

@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import PageHeader from "@/components/PageHeader";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import StatusBadge from "@/components/StatusBadge";
 import { orderStatusTone } from "@/lib/orderStatus";
 
@@ -13,6 +14,7 @@ const orders = [
 export default function OrdersPage() {
   return (
     <>
+      <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Orders" }]} />
       <PageHeader
         variant="storefront"
         eyebrow="YOUR ACCOUNT"

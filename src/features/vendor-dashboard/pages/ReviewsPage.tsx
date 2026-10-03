@@ -1,9 +1,11 @@
 import PageHeader from "@/components/PageHeader";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { vendorReviews } from "@/features/vendor-dashboard/mock";
 
 export default function ReviewsPage() {
   return (
     <>
+      <Breadcrumbs items={[{ label: "Dashboard", to: "/vendor/dashboard" }, { label: "Reviews" }]} />
       <PageHeader
         eyebrow="CUSTOMER FEEDBACK"
         title="Reviews"

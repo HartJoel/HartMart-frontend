@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Button from "@/components/Button";
 import PageHeader from "@/components/PageHeader";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const settingRow = "grid grid-cols-[220px_1fr] gap-[50px] border-t border-hm-border py-10 max-[700px]:grid-cols-1";
 
@@ -9,6 +10,7 @@ export default function SettingsPage() {
 
   return (
     <>
+      <Breadcrumbs items={[{ label: "Dashboard", to: "/vendor/dashboard" }, { label: "Settings" }]} />
       <PageHeader
         eyebrow="STORE PROFILE"
         title="Settings"

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import Button from "@/components/Button";
 import PageHeader from "@/components/PageHeader";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { cn } from "@/lib/cn";
 import { formatNaira } from "@/lib/format";
 import { products } from "@/lib/mock/products";
@@ -17,6 +18,7 @@ export default function CheckoutPage() {
 
   return (
     <>
+      <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Cart", to: "/cart" }, { label: "Checkout" }]} />
       <PageHeader
         variant="storefront"
         eyebrow="CHECKOUT"

@@ -1,6 +1,7 @@
 import { useParams } from "react-router";
 import Button from "@/components/Button";
 import PageHeader from "@/components/PageHeader";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { formatNaira } from "@/lib/format";
 import { products } from "@/lib/mock/products";
 
@@ -11,6 +12,7 @@ export default function OrderDetailPage() {
 
   return (
     <>
+      <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Orders", to: "/orders" }, { label: `Order ${id}` }]} />
       <PageHeader
         variant="storefront"
         eyebrow="ORDER DETAIL"
