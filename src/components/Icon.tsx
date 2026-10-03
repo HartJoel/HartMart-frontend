@@ -3,6 +3,7 @@ import { cn } from "@/lib/cn";
 
 export type IconName =
   | "account"
+  | "arrow"
   | "cart"
   | "categories"
   | "check"
@@ -25,6 +26,7 @@ const paths: Record<IconName, ReactNode> = {
       <path d="M4.5 20.5a7.5 7.5 0 0 1 15 0" />
     </>
   ),
+  arrow: <path d="M5 12h14M13 6l6 6-6 6" />,
   cart: (
     <>
       <path d="M4.5 8.5h15l-1.3 11H5.8l-1.3-11Z" />

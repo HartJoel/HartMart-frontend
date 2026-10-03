@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import { buttonClasses } from "@/components/Button";
 import ProductCard from "@/features/catalog/components/ProductCard";
+import VendorSpotlight from "@/features/catalog/components/VendorSpotlight";
 import { productGridClass, sectionHeadClass } from "@/features/catalog/styles";
 import { products } from "@/lib/mock/products";
 
@@ -49,6 +50,8 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      <VendorSpotlight />
 
       <section className="pt-[100px]">
         <div className={sectionHeadClass}>
