@@ -3,6 +3,7 @@ import { Link, NavLink } from "react-router";
 import Brand from "@/components/Brand";
 import { buttonClasses } from "@/components/Button";
 import Icon, { type IconName } from "@/components/Icon";
+import { useNotifications } from "@/features/notifications/NotificationsContext";
 import { cn } from "@/lib/cn";
 import { useMotionPresets } from "@/lib/motion";
 
@@ -59,6 +60,8 @@ function HeaderIconLink({
 }
 
 export default function Header() {
+  const { unreadCount } = useNotifications();
+
   return (
     <header className="flex min-h-[82px] items-center gap-10 border-b border-hm-border bg-[rgba(250,250,250,0.9)] px-[clamp(20px,5vw,72px)] py-4 max-[600px]:gap-4">
       <Brand to="/" />
@@ -87,6 +90,12 @@ export default function Header() {
             hideOnMobile={item.hideOnMobile}
           />
         ))}
+        <HeaderIconLink
+          to="/notifications"
+          label={unreadCount ? `Notifications, ${unreadCount} unread` : "Notifications"}
+          icon="bell"
+          badge={unreadCount ? String(unreadCount) : undefined}
+        />
         <HeaderIconLink to="/cart" label="Cart, 3 items" icon="cart" badge="3" />
       </nav>
     </header>

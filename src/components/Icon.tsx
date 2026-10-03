@@ -4,6 +4,7 @@ import { cn } from "@/lib/cn";
 export type IconName =
   | "account"
   | "arrow"
+  | "bell"
   | "cart"
   | "categories"
   | "check"
@@ -17,6 +18,7 @@ export type IconName =
   | "search"
   | "shop"
   | "star"
+  | "trash"
   | "users"
   | "vendors";
 
@@ -28,6 +30,12 @@ const paths: Record<IconName, ReactNode> = {
     </>
   ),
   arrow: <path d="M5 12h14M13 6l6 6-6 6" />,
+  bell: (
+    <>
+      <path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15L6 16Z" />
+      <path d="M10 20.5a2 2 0 0 0 4 0" />
+    </>
+  ),
   cart: (
     <>
       <path d="M4.5 8.5h15l-1.3 11H5.8l-1.3-11Z" />
@@ -74,6 +82,7 @@ const paths: Record<IconName, ReactNode> = {
     </>
   ),
   star: <path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8L12 3.5Z" />,
+  trash: <path d="M4 6.5h16M9.5 6.5V4.5h5v2M6.5 6.5l1 13h9l1-13" />,
   users: (
     <>
       <circle cx="9" cy="8" r="3.5" />

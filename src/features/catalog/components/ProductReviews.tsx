@@ -1,7 +1,7 @@
 import Rating from "@/components/Rating";
 import StatusBadge from "@/components/StatusBadge";
 import { sectionHeadClass } from "@/features/catalog/styles";
-import { formatReviewDate } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 import { productReviews, reviewSummary } from "@/lib/mock/reviews";
 import type { Review } from "@/types/review";
 
@@ -64,7 +64,7 @@ function ReviewItem({ review }: { review: Review }) {
       <div className="flex flex-col gap-2">
         <Rating value={review.rating} size={14} />
         <strong className="text-[13px] font-[650]">{review.author}</strong>
-        <small className="text-[11px] text-hm-muted">{formatReviewDate(review.date)}</small>
+        <small className="text-[11px] text-hm-muted">{formatDate(review.date)}</small>
       </div>
       <div className="flex flex-col gap-2.5">
         <h3 className="m-0 text-[15px] font-[650]">{review.title}</h3>

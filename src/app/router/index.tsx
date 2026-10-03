@@ -13,7 +13,9 @@ import ProductDetailPage from "@/features/catalog/pages/ProductDetailPage";
 import ProductsPage from "@/features/catalog/pages/ProductsPage";
 import CheckoutPage from "@/features/checkout/pages/CheckoutPage";
 import PaymentCallbackPage from "@/features/checkout/pages/PaymentCallbackPage";
-import AccountPage from "@/features/account/pages/AccountPage";
+import AddressesPage from "@/features/account/pages/AddressesPage";
+import ProfilePage from "@/features/account/pages/ProfilePage";
+import NotificationsPage from "@/features/notifications/pages/NotificationsPage";
 import OrderDetailPage from "@/features/orders/pages/OrderDetailPage";
 import OrdersPage from "@/features/orders/pages/OrdersPage";
 import AdminCategoriesPage from "@/features/admin/pages/CategoriesPage";
@@ -66,8 +68,9 @@ export const router = createBrowserRouter([
           { path: "/cart", element: <CartPage /> },
           { path: "/orders", element: <OrdersPage /> },
           { path: "/orders/:id", element: <OrderDetailPage /> },
-          { path: "/account", element: <AccountPage /> },
-          { path: "/account/addresses", element: <AccountPage addresses /> },
+          { path: "/account", element: <ProfilePage /> },
+          { path: "/account/addresses", element: <AddressesPage /> },
+          { path: "/notifications", element: <NotificationsPage /> },
         ],
       },
 
