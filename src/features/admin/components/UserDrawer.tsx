@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import Button from "@/components/Button";
 import Icon from "@/components/Icon";
+import IconButton from "@/components/IconButton";
 import StatusBadge from "@/components/StatusBadge";
 import { initialsOf, type AdminUser } from "@/features/admin/mock";
 import { easeOut, useMotionPresets } from "@/lib/motion";
@@ -34,14 +35,9 @@ export default function UserDrawer({ user, onClose }: UserDrawerProps) {
         transition={{ duration: reduce ? 0 : 0.38, ease: easeOut }}
       >
         <div className="flex justify-end">
-          <button
-            type="button"
-            aria-label="Close user details"
-            onClick={onClose}
-            className="grid size-9 place-items-center rounded-full border-0 bg-hm-field"
-          >
+          <IconButton label="Close user details" onClick={onClose}>
             <Icon name="close" size={15} />
-          </button>
+          </IconButton>
         </div>
         <div className="mt-12 grid size-18 place-items-center rounded-full bg-hm-text text-[17px] font-[700] text-white">
           {initialsOf(user.name)}

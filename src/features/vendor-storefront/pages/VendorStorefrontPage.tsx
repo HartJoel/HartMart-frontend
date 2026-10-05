@@ -1,6 +1,8 @@
 import { Link, useParams } from "react-router";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { buttonClasses } from "@/components/Button";
+import RevealGroup from "@/components/RevealGroup";
+import { RevealItem } from "@/components/Reveal";
 import ProductCard from "@/features/catalog/components/ProductCard";
 import { productGridClass, sectionHeadClass } from "@/features/catalog/styles";
 import VendorBanner from "@/features/vendor-storefront/components/VendorBanner";
@@ -49,11 +51,13 @@ export default function VendorStorefrontPage() {
         </div>
 
         {listed.length > 0 ? (
-          <div className={productGridClass}>
+          <RevealGroup className={productGridClass}>
             {listed.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <RevealItem key={product.id}>
+                <ProductCard product={product} />
+              </RevealItem>
             ))}
-          </div>
+          </RevealGroup>
         ) : (
           <div className="grid place-items-center gap-4 rounded-hm-md border border-dashed border-hm-border px-6 py-16 text-center">
             <p className="m-0 text-[13px] text-hm-muted">{vendor.name} hasn't listed any products yet.</p>

@@ -83,7 +83,7 @@ export default function UsersPage() {
               key={user.id}
               tabIndex={0}
               onClick={() => setSelected(user)}
-              className="cursor-pointer hover:bg-[#fbfbfc] focus-visible:outline-[3px] focus-visible:outline-[rgba(79,70,229,0.24)] focus-visible:outline-offset-[3px]"
+              className="cursor-pointer focus-visible:outline-[3px] focus-visible:outline-[rgba(79,70,229,0.24)] focus-visible:outline-offset-[3px]"
             >
               <td className={tableCell}>
                 <div className="flex items-center gap-3">

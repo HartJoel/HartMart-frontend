@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { buttonClasses } from "@/components/Button";
+import Icon from "@/components/Icon";
+import IconButton from "@/components/IconButton";
 import PageHeader from "@/components/PageHeader";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import QuantityStepper from "@/components/QuantityStepper";
@@ -83,14 +85,14 @@ export default function CartPage() {
                 />
               </div>
               <b className="max-[600px]:col-start-2">{formatNaira(product.price * quantity)}</b>
-              <button
-                type="button"
-                aria-label={`Remove ${product.name}`}
+              <IconButton
+                tone="danger"
+                label={`Remove ${product.name}`}
                 onClick={() => removeItem(product.id)}
-                className="border-0 bg-transparent text-[20px] max-[600px]:col-start-3 max-[600px]:row-start-1"
+                className="max-[600px]:col-start-3 max-[600px]:row-start-1"
               >
-                ×
-              </button>
+                <Icon name="close" size={13} />
+              </IconButton>
             </article>
           ))}
         </section>

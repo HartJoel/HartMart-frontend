@@ -1,3 +1,4 @@
+import { AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import Button from "@/components/Button";
 import Modal from "@/components/Modal";
@@ -47,18 +48,20 @@ export default function OrderReviews({ order }: { order: Order }) {
         })}
       </ul>
 
-      {reviewing && (
-        <Modal title={reviewing.name} eyebrow="LEAVE A REVIEW" onClose={() => setReviewing(null)}>
-          <ReviewForm
-            initial={getReview(order.id, reviewing.id)}
-            onSubmit={(input) => {
-              submitReview(order.id, reviewing.id, input);
-              setReviewing(null);
-            }}
-            onCancel={() => setReviewing(null)}
-          />
-        </Modal>
-      )}
+      <AnimatePresence>
+        {reviewing && (
+          <Modal title={reviewing.name} eyebrow="LEAVE A REVIEW" onClose={() => setReviewing(null)}>
+            <ReviewForm
+              initial={getReview(order.id, reviewing.id)}
+              onSubmit={(input) => {
+                submitReview(order.id, reviewing.id, input);
+                setReviewing(null);
+              }}
+              onCancel={() => setReviewing(null)}
+            />
+          </Modal>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

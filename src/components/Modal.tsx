@@ -1,5 +1,8 @@
+import { motion } from "framer-motion";
 import { useId, useRef, type ReactNode } from "react";
 import Icon from "@/components/Icon";
+import IconButton from "@/components/IconButton";
+import { useMotionPresets } from "@/lib/motion";
 import { useDialog } from "@/lib/useDialog";
 import { cn } from "@/lib/cn";
 
@@ -11,24 +14,33 @@ type ModalProps = {
   className?: string;
 };
 
-/** Centred dialog for short, focused tasks such as a form or a confirmation. */
+/**
+ * Centred dialog for short, focused tasks such as a form or a confirmation.
+ * Render it inside an AnimatePresence so its exit plays before it unmounts.
+ */
 export default function Modal({ title, eyebrow, onClose, children, className }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
+  const { overlay, dialog } = useMotionPresets();
   useDialog(dialogRef, onClose);
 
   return (
-    <div
+    <motion.div
       className="fixed inset-0 z-50 grid place-items-center bg-[rgba(20,20,22,0.35)] p-6 backdrop-blur-[5px]"
       onMouseDown={onClose}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      variants={overlay}
     >
-      <div
+      <motion.div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
         onMouseDown={(event) => event.stopPropagation()}
+        variants={dialog}
         className={cn(
           "max-h-full w-[min(100%,540px)] overflow-y-auto rounded-hm-md bg-hm-surface p-10 outline-0 max-[480px]:p-6",
           className,
@@ -43,17 +55,12 @@ export default function Modal({ title, eyebrow, onClose, children, className }: 
               {title}
             </h2>
           </div>
-          <button
-            type="button"
-            aria-label="Close"
-            onClick={onClose}
-            className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-full border-0 bg-hm-field"
-          >
+          <IconButton label="Close" onClick={onClose}>
             <Icon name="close" size={15} />
-          </button>
+          </IconButton>
         </div>
         {children}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

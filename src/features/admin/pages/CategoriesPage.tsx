@@ -1,7 +1,9 @@
+import { AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Button from "@/components/Button";
 import Icon from "@/components/Icon";
+import IconButton from "@/components/IconButton";
 import Modal from "@/components/Modal";
 import PageHeader from "@/components/PageHeader";
 import CategoryForm, { type CategoryValues } from "@/features/admin/components/CategoryForm";
@@ -119,36 +121,39 @@ export default function CategoriesPage() {
         </button>
       </div>
 
-      {dialog?.mode === "create" && (
-        <Modal
-          title={dialog.parentId === null ? "New category" : "New subcategory"}
-          eyebrow="CATALOG STRUCTURE"
-          onClose={close}
-        >
-          <CategoryForm
-            mode="create"
-            initial={{ name: "", parentId: dialog.parentId }}
-            categories={categories}
-            submitLabel={dialog.parentId === null ? "Add category" : "Add subcategory"}
-            onSubmit={createCategory}
-            onCancel={close}
-          />
-        </Modal>
-      )}
+      <AnimatePresence>
+        {dialog?.mode === "create" && (
+          <Modal
+            key="create"
+            title={dialog.parentId === null ? "New category" : "New subcategory"}
+            eyebrow="CATALOG STRUCTURE"
+            onClose={close}
+          >
+            <CategoryForm
+              mode="create"
+              initial={{ name: "", parentId: dialog.parentId }}
+              categories={categories}
+              submitLabel={dialog.parentId === null ? "Add category" : "Add subcategory"}
+              onSubmit={createCategory}
+              onCancel={close}
+            />
+          </Modal>
+        )}
 
-      {dialog?.mode === "rename" && (
-        <Modal title="Rename category" eyebrow="CATALOG STRUCTURE" onClose={close}>
-          <CategoryForm
-            mode="rename"
-            initial={{ name: dialog.category.name, parentId: dialog.category.parentId }}
-            categories={categories}
-            editingId={dialog.category.id}
-            submitLabel="Save name"
-            onSubmit={({ name }) => renameCategory(dialog.category.id, name)}
-            onCancel={close}
-          />
-        </Modal>
-      )}
+        {dialog?.mode === "rename" && (
+          <Modal key="rename" title="Rename category" eyebrow="CATALOG STRUCTURE" onClose={close}>
+            <CategoryForm
+              mode="rename"
+              initial={{ name: dialog.category.name, parentId: dialog.category.parentId }}
+              categories={categories}
+              editingId={dialog.category.id}
+              submitLabel="Save name"
+              onSubmit={({ name }) => renameCategory(dialog.category.id, name)}
+              onCancel={close}
+            />
+          </Modal>
+        )}
+      </AnimatePresence>
     </>
   );
 }
@@ -164,14 +169,8 @@ function Stat({ label, value }: { label: string; value: number }) {
 
 function RenameButton({ name, onClick }: { name: string; onClick: () => void }) {
   return (
-    <button
-      type="button"
-      aria-label={`Rename ${name}`}
-      title={`Rename ${name}`}
-      onClick={onClick}
-      className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-full border-0 bg-transparent text-hm-muted transition-colors duration-200 hover:bg-hm-field hover:text-hm-text"
-    >
+    <IconButton label={`Rename ${name}`} title={`Rename ${name}`} onClick={onClick}>
       <Icon name="edit" size={14} />
-    </button>
+    </IconButton>
   );
 }

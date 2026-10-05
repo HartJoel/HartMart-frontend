@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import Button from "@/components/Button";
 import Icon from "@/components/Icon";
+import IconButton from "@/components/IconButton";
 import { easeOut, useMotionPresets } from "@/lib/motion";
 
 type RejectApplicationModalProps = {
@@ -43,14 +44,9 @@ export default function RejectApplicationModal({ store, onClose, onReject }: Rej
               {store}
             </div>
           </div>
-          <button
-            type="button"
-            aria-label="Close"
-            onClick={onClose}
-            className="grid size-9 place-items-center rounded-full border-0 bg-hm-field"
-          >
+          <IconButton label="Close" onClick={onClose}>
             <Icon name="close" size={15} />
-          </button>
+          </IconButton>
         </div>
         <label htmlFor="reason" className="block text-[10px] font-[650]">
           Reason for rejection

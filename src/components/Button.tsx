@@ -13,8 +13,10 @@ const sizes: Record<Size, string> = {
 const variants: Record<Variant, string> = {
   primary:
     "bg-hm-accent text-white transition-[transform,background-color] duration-200 not-disabled:hover:-translate-y-0.5 not-disabled:hover:bg-hm-accent-dark not-disabled:active:translate-y-0 not-disabled:active:scale-[0.98] disabled:bg-[#ccc]",
-  ghost: "bg-transparent text-hm-accent transition-colors duration-200 not-disabled:hover:bg-[#eeeeff]",
-  quiet: "bg-hm-field text-hm-muted",
+  ghost:
+    "bg-transparent text-hm-accent transition-[background-color,transform] duration-200 not-disabled:hover:bg-[#eeeeff] not-disabled:active:scale-[0.98]",
+  quiet:
+    "bg-hm-field text-hm-muted transition-[background-color,color,transform] duration-200 not-disabled:hover:bg-hm-border not-disabled:hover:text-hm-text not-disabled:active:scale-[0.98]",
   link: "min-h-0 px-0 rounded-none bg-transparent text-[13px] font-[600] text-hm-accent underline-offset-[3px] hover:underline",
 };
 

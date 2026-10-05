@@ -3,6 +3,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import Button from "@/components/Button";
 import PageHeader from "@/components/PageHeader";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import RevealGroup from "@/components/RevealGroup";
+import { RevealItem } from "@/components/Reveal";
 import { cn } from "@/lib/cn";
 import { useMotionPresets } from "@/lib/motion";
 import ProductCard from "@/features/catalog/components/ProductCard";
@@ -57,8 +59,8 @@ export default function ProductsPage() {
         </aside>
 
         <section>
-          {/* Keyed by state so skeleton and results cross-fade as one block, not card by card. */}
-          <AnimatePresence mode="wait" initial={false}>
+          {/* Keyed by state so skeleton, results and empty swap as one block. Results then stagger in card by card. */}
+          <AnimatePresence mode="wait">
             <motion.div
               key={loading ? "loading" : visible.length ? "results" : "empty"}
               initial="hidden"
@@ -76,11 +78,13 @@ export default function ProductsPage() {
                   ))}
                 </div>
               ) : visible.length ? (
-                <div className={productGridClass}>
+                <RevealGroup className={productGridClass}>
                   {visible.map((product) => (
-                    <ProductCard key={product.id} product={product} />
+                    <RevealItem key={product.id}>
+                      <ProductCard product={product} />
+                    </RevealItem>
                   ))}
-                </div>
+                </RevealGroup>
               ) : (
                 <div className="flex min-h-[420px] flex-col items-center justify-center text-center">
                   <h2 className="m-0">No products match this search.</h2>

@@ -1,3 +1,4 @@
+import { AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Drawer from "@/components/Drawer";
@@ -54,11 +55,13 @@ export default function OrdersPage() {
         ))}
       </ul>
 
-      {selected && (
-        <Drawer eyebrow="ORDER DETAILS" title={`Order ${selected.id}`} onClose={() => setSelected(null)}>
-          <OrderDetails order={selected} />
-        </Drawer>
-      )}
+      <AnimatePresence>
+        {selected && (
+          <Drawer eyebrow="ORDER DETAILS" title={`Order ${selected.id}`} onClose={() => setSelected(null)}>
+            <OrderDetails order={selected} />
+          </Drawer>
+        )}
+      </AnimatePresence>
     </AccountShell>
   );
 }

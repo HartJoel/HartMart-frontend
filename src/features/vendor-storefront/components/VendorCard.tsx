@@ -14,7 +14,7 @@ export default function VendorCard({ vendor, productCount }: VendorCardProps) {
   return (
     <Link
       to={`/vendors/${vendor.id}`}
-      className="group flex flex-col gap-5 rounded-hm-md border border-hm-border bg-hm-surface p-6 text-hm-text no-underline transition-shadow duration-300 hover:shadow-[0_22px_44px_-24px_rgba(26,26,26,0.32)]"
+      className="group flex flex-col gap-5 rounded-hm-md border border-hm-border bg-hm-surface p-6 text-hm-text no-underline transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_44px_-24px_rgba(26,26,26,0.32)]"
     >
       <div className="flex items-start justify-between gap-4">
         <span

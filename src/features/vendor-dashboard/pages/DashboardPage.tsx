@@ -1,4 +1,6 @@
 import PageHeader from "@/components/PageHeader";
+import RevealGroup from "@/components/RevealGroup";
+import { RevealItem } from "@/components/Reveal";
 import OrdersTable from "@/features/vendor-dashboard/components/OrdersTable";
 
 const metrics = [
@@ -17,15 +19,17 @@ export default function DashboardPage() {
         description="Here’s what’s happening with your store today."
       />
 
-      <div className="grid grid-cols-4 gap-5 max-[900px]:grid-cols-2 max-[700px]:grid-cols-1">
+      <RevealGroup className="grid grid-cols-4 gap-5 max-[900px]:grid-cols-2 max-[700px]:grid-cols-1">
         {metrics.map((metric) => (
-          <article key={metric.label} className="flex min-h-[180px] flex-col rounded-hm-md bg-hm-surface p-[26px]">
-            <span className="text-[9px] text-hm-muted">{metric.label}</span>
-            <b className="mt-auto text-[34px] tracking-[-0.05em]">{metric.value}</b>
-            <small className="text-[8px] text-hm-muted">{metric.note}</small>
-          </article>
+          <RevealItem key={metric.label} className="flex">
+            <article className="flex min-h-[180px] flex-1 flex-col rounded-hm-md bg-hm-surface p-[26px]">
+              <span className="text-[9px] text-hm-muted">{metric.label}</span>
+              <b className="mt-auto text-[34px] tracking-[-0.05em]">{metric.value}</b>
+              <small className="text-[8px] text-hm-muted">{metric.note}</small>
+            </article>
+          </RevealItem>
         ))}
-      </div>
+      </RevealGroup>
 
       <div className="mt-6 rounded-[12px] border-l-[3px] border-[#c18a25] bg-[#fbf5e9] p-[22px]">
         <b className="block text-[10px]">Two products are running low</b>

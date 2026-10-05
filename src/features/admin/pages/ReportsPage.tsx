@@ -1,7 +1,11 @@
 import { useState, type ChangeEvent } from "react";
+import { motion, type Variants } from "framer-motion";
 import PageHeader from "@/components/PageHeader";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import RevealGroup from "@/components/RevealGroup";
+import { RevealItem, revealViewport } from "@/components/Reveal";
 import { revenueBars } from "@/features/admin/mock";
+import { easeOut, useMotionPresets } from "@/lib/motion";
 
 const metrics = [
   { label: "Gross revenue", value: "₦48.2m", delta: "+12.8%" },
@@ -12,6 +16,16 @@ const metrics = [
 export default function ReportsPage() {
   const [from, setFrom] = useState("2025-06-01");
   const [to, setTo] = useState("2025-06-20");
+  const { reduce } = useMotionPresets();
+
+  // Bars grow up from the baseline in sequence once the chart is in view. Reduced motion shows them at full height.
+  const bar: Variants = {
+    hidden: { scaleY: reduce ? 1 : 0 },
+    visible: (index: number) => ({
+      scaleY: 1,
+      transition: { duration: reduce ? 0 : 0.5, ease: easeOut, delay: reduce ? 0 : 0.1 + index * 0.03 },
+    }),
+  };
 
   return (
     <>
@@ -50,15 +64,17 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-5 max-[760px]:grid-cols-1">
+      <RevealGroup className="grid grid-cols-3 gap-5 max-[760px]:grid-cols-1">
         {metrics.map((metric) => (
-          <article key={metric.label} className="flex min-h-[150px] flex-col rounded-hm-md bg-hm-surface p-6">
-            <div className="text-[9px] text-hm-muted">{metric.label}</div>
-            <div className="mt-auto text-[28px] font-[650] tracking-[-0.04em]">{metric.value}</div>
-            <div className="mt-1 text-[8px] text-[#267452]">{metric.delta}</div>
-          </article>
+          <RevealItem key={metric.label} className="flex">
+            <article className="flex min-h-[150px] flex-1 flex-col rounded-hm-md bg-hm-surface p-6">
+              <div className="text-[9px] text-hm-muted">{metric.label}</div>
+              <div className="mt-auto text-[28px] font-[650] tracking-[-0.04em]">{metric.value}</div>
+              <div className="mt-1 text-[8px] text-[#267452]">{metric.delta}</div>
+            </article>
+          </RevealItem>
         ))}
-      </div>
+      </RevealGroup>
 
       <section className="mt-5 rounded-hm-md bg-hm-surface p-8">
         <div className="flex items-start justify-between">
@@ -68,18 +84,23 @@ export default function ReportsPage() {
           </div>
           <div className="text-[22px] font-bold">₦48.2m</div>
         </div>
-        <div
+        <motion.div
           aria-label="Revenue bar chart"
+          initial="hidden"
+          whileInView="visible"
+          viewport={revealViewport}
           className="mt-12 flex h-70 items-end gap-[clamp(6px,2vw,22px)] border-b border-hm-border bg-[repeating-linear-gradient(to_bottom,transparent_0,transparent_69px,#f0f0f2_70px)] px-3"
         >
           {revenueBars.map((height, index) => (
-            <div
+            <motion.div
               key={index}
-              className="max-w-11 flex-1 rounded-t-[6px] bg-hm-accent opacity-[0.82]"
+              custom={index}
+              variants={bar}
+              className="max-w-11 flex-1 origin-bottom rounded-t-[6px] bg-hm-accent opacity-[0.82]"
               style={{ height: `${height}%` }}
             />
           ))}
-        </div>
+        </motion.div>
         <div className="mt-3 flex justify-between text-[8px] text-hm-muted">
           <div>1 Jun</div>
           <div>10 Jun</div>

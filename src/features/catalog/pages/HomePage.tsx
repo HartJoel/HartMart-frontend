@@ -1,5 +1,7 @@
 import { Link } from "react-router";
 import { buttonClasses } from "@/components/Button";
+import RevealGroup from "@/components/RevealGroup";
+import { RevealItem } from "@/components/Reveal";
 import ProductCard from "@/features/catalog/components/ProductCard";
 import VendorSpotlight from "@/features/catalog/components/VendorSpotlight";
 import { productGridClass, sectionHeadClass } from "@/features/catalog/styles";
@@ -37,18 +39,19 @@ export default function HomePage() {
         <div className={sectionHeadClass}>
           <h2 className="m-0 text-[32px] tracking-[-0.045em]">Shop by category</h2>
         </div>
-        <div className="flex gap-7 overflow-auto">
+        <RevealGroup className="flex gap-7 overflow-auto">
           {categories.map((category) => (
-            <Link
-              key={category}
-              to={`/products?category=${encodeURIComponent(category)}`}
-              className="flex min-w-max items-center gap-2.5 text-[12px] font-[650] text-hm-text no-underline"
-            >
-              <span className="grid size-11 place-items-center rounded-full bg-hm-field">{category.slice(0, 1)}</span>
-              {category}
-            </Link>
+            <RevealItem key={category} className="shrink-0">
+              <Link
+                to={`/products?category=${encodeURIComponent(category)}`}
+                className="flex min-w-max items-center gap-2.5 text-[12px] font-[650] text-hm-text no-underline transition-colors duration-200 hover:text-hm-accent"
+              >
+                <span className="grid size-11 place-items-center rounded-full bg-hm-field">{category.slice(0, 1)}</span>
+                {category}
+              </Link>
+            </RevealItem>
           ))}
-        </div>
+        </RevealGroup>
       </section>
 
       <VendorSpotlight />
@@ -63,11 +66,13 @@ export default function HomePage() {
             View all
           </Link>
         </div>
-        <div className={productGridClass}>
+        <RevealGroup className={productGridClass}>
           {products.slice(0, 4).map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <RevealItem key={product.id}>
+              <ProductCard product={product} />
+            </RevealItem>
           ))}
-        </div>
+        </RevealGroup>
       </section>
     </>
   );

@@ -1,3 +1,4 @@
+import { AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { Link } from "react-router";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -94,43 +95,45 @@ export default function AddressesPage() {
         </div>
       )}
 
-      {dialog?.mode === "create" && (
-        <Modal title="New address" eyebrow="ADDRESS BOOK" onClose={close}>
-          <AddressForm onSubmit={(value) => saveAddress(value)} onCancel={close} />
-        </Modal>
-      )}
+      <AnimatePresence>
+        {dialog?.mode === "create" && (
+          <Modal key="create" title="New address" eyebrow="ADDRESS BOOK" onClose={close}>
+            <AddressForm onSubmit={(value) => saveAddress(value)} onCancel={close} />
+          </Modal>
+        )}
 
-      {dialog?.mode === "edit" && (
-        <Modal title="Edit address" eyebrow="ADDRESS BOOK" onClose={close}>
-          <AddressForm
-            initial={dialog.address}
-            onSubmit={(value) => saveAddress(value, dialog.address.id)}
-            onCancel={close}
-          />
-        </Modal>
-      )}
+        {dialog?.mode === "edit" && (
+          <Modal key="edit" title="Edit address" eyebrow="ADDRESS BOOK" onClose={close}>
+            <AddressForm
+              initial={dialog.address}
+              onSubmit={(value) => saveAddress(value, dialog.address.id)}
+              onCancel={close}
+            />
+          </Modal>
+        )}
 
-      {dialog?.mode === "delete" && (
-        <Modal title="Delete this address?" eyebrow="ADDRESS BOOK" onClose={close} className="max-w-[440px]">
-          <p className="m-0 text-[13px] leading-[1.7] text-hm-muted">
-            <span className="font-[650] text-hm-text">{dialog.address.label}</span> at {dialog.address.line1} will be
-            removed from your address book. Past orders keep their delivery details.
-          </p>
-          <div className="mt-8 flex justify-end gap-3 max-[480px]:flex-col-reverse">
-            <Button variant="quiet" size="sm" onClick={close} className="max-[480px]:w-full">
-              Cancel
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => removeAddress(dialog.address.id)}
-              className="text-hm-error hover:bg-hm-error-soft max-[480px]:w-full"
-            >
-              Delete address
-            </Button>
-          </div>
-        </Modal>
-      )}
+        {dialog?.mode === "delete" && (
+          <Modal key="delete" title="Delete this address?" eyebrow="ADDRESS BOOK" onClose={close} className="max-w-[440px]">
+            <p className="m-0 text-[13px] leading-[1.7] text-hm-muted">
+              <span className="font-[650] text-hm-text">{dialog.address.label}</span> at {dialog.address.line1} will be
+              removed from your address book. Past orders keep their delivery details.
+            </p>
+            <div className="mt-8 flex justify-end gap-3 max-[480px]:flex-col-reverse">
+              <Button variant="quiet" size="sm" onClick={close} className="max-[480px]:w-full">
+                Cancel
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => removeAddress(dialog.address.id)}
+                className="text-hm-error hover:bg-hm-error-soft max-[480px]:w-full"
+              >
+                Delete address
+              </Button>
+            </div>
+          </Modal>
+        )}
+      </AnimatePresence>
 
       {addresses.length === 0 && (
         <p className="mt-8 text-[12px] text-hm-muted">
