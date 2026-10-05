@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link } from "react-router";
 import { buttonClasses } from "@/components/Button";
 import Icon from "@/components/Icon";
@@ -7,28 +6,11 @@ import PageHeader from "@/components/PageHeader";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import QuantityStepper from "@/components/QuantityStepper";
 import ResultScreen from "@/components/ResultScreen";
+import { useCart } from "@/features/cart/CartContext";
 import { formatNaira } from "@/lib/format";
-import { products } from "@/lib/mock/products";
-import type { Product } from "@/types/product";
-
-type CartItem = { product: Product; quantity: number };
 
 export default function CartPage() {
-  const [items, setItems] = useState<CartItem[]>(() =>
-    products.slice(0, 3).map((product, index) => ({ product, quantity: index === 1 ? 2 : 1 })),
-  );
-
-  function changeQuantity(id: number, delta: number) {
-    setItems((current) =>
-      current.map((entry) =>
-        entry.product.id === id ? { ...entry, quantity: Math.max(1, entry.quantity + delta) } : entry,
-      ),
-    );
-  }
-
-  function removeItem(id: number) {
-    setItems((current) => current.filter((entry) => entry.product.id !== id));
-  }
+  const { items, itemCount, changeQuantity, removeItem } = useCart();
 
   if (!items.length) {
     return (
@@ -47,7 +29,6 @@ export default function CartPage() {
     );
   }
 
-  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 
   return (

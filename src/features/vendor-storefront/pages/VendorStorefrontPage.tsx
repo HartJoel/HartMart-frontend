@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router";
+import { Link, useLocation, useParams } from "react-router";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { buttonClasses } from "@/components/Button";
 import RevealGroup from "@/components/RevealGroup";
@@ -6,12 +6,16 @@ import { RevealItem } from "@/components/Reveal";
 import ProductCard from "@/features/catalog/components/ProductCard";
 import { productGridClass, sectionHeadClass } from "@/features/catalog/styles";
 import VendorBanner from "@/features/vendor-storefront/components/VendorBanner";
+import type { VendorOriginState } from "@/features/vendor-storefront/vendorOrigin";
 import { productsByVendor } from "@/lib/mock/products";
 import { findVendor } from "@/lib/mock/vendors";
 
 export default function VendorStorefrontPage() {
   const { id } = useParams();
+  const location = useLocation();
   const vendor = findVendor(id);
+  // Without origin state (a direct visit or a shared link) the trail falls back to the vendor directory.
+  const origin = (location.state as Partial<VendorOriginState> | null)?.origin ?? [{ label: "Vendors", to: "/vendors" }];
 
   if (!vendor) {
     return (
@@ -29,7 +33,7 @@ export default function VendorStorefrontPage() {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Vendors", to: "/vendors" }, { label: vendor.name }]} />
+      <Breadcrumbs items={[{ label: "Home", to: "/" }, ...origin, { label: vendor.name }]} />
       <VendorBanner vendor={vendor} productCount={listed.length} />
 
       <section className="pt-[80px]">

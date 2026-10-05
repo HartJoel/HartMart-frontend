@@ -23,7 +23,11 @@ export default function VendorDirectoryPage() {
         <RevealGroup className="grid grid-cols-3 gap-5 max-[1000px]:grid-cols-2 max-[600px]:grid-cols-1">
           {vendors.map((vendor) => (
             <RevealItem key={vendor.id}>
-              <VendorCard vendor={vendor} productCount={productsByVendor(vendor.id).length} />
+              <VendorCard
+                vendor={vendor}
+                productCount={productsByVendor(vendor.id).length}
+                from={[{ label: "Vendors", to: "/vendors" }]}
+              />
             </RevealItem>
           ))}
         </RevealGroup>

@@ -5,6 +5,8 @@ import { buttonClasses } from "@/components/Button";
 import Icon, { type IconName } from "@/components/Icon";
 import { useSession } from "@/features/auth/SessionContext";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
+import { useCart } from "@/features/cart/CartContext";
+import { useWishlist } from "@/features/wishlist/WishlistContext";
 import { cn } from "@/lib/cn";
 import { useMotionPresets } from "@/lib/motion";
 
@@ -62,6 +64,8 @@ function HeaderIconLink({
 
 export default function Header() {
   const { unreadCount } = useNotifications();
+  const { savedIds } = useWishlist();
+  const { itemCount } = useCart();
   const { roles } = useSession();
 
   return (
@@ -127,7 +131,18 @@ export default function Header() {
           icon="bell"
           badge={unreadCount ? String(unreadCount) : undefined}
         />
-        <HeaderIconLink to="/cart" label="Cart, 3 items" icon="cart" badge="3" />
+        <HeaderIconLink
+          to="/wishlist"
+          label={savedIds.length ? `Wishlist, ${savedIds.length} saved` : "Wishlist"}
+          icon="heart"
+          badge={savedIds.length ? String(savedIds.length) : undefined}
+        />
+        <HeaderIconLink
+          to="/cart"
+          label={itemCount ? `Cart, ${itemCount} items` : "Cart"}
+          icon="cart"
+          badge={itemCount ? String(itemCount) : undefined}
+        />
       </nav>
     </header>
   );

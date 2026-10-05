@@ -1,20 +1,32 @@
 import { Link } from "react-router";
 import Icon from "@/components/Icon";
+import type { Crumb } from "@/components/Breadcrumbs";
 import Rating from "@/components/Rating";
 import StatusBadge from "@/components/StatusBadge";
+import { cn } from "@/lib/cn";
+import type { VendorOriginState } from "@/features/vendor-storefront/vendorOrigin";
 import type { Vendor } from "@/types/vendor";
 
 type VendorCardProps = {
   vendor: Vendor;
   productCount: number;
+  /** Trail the shopper is coming from, passed to the storefront breadcrumb. */
+  from: Crumb[];
+  className?: string;
 };
 
-/** Directory entry for one vendor. The whole card links to the storefront. */
-export default function VendorCard({ vendor, productCount }: VendorCardProps) {
+/** The one vendor card, used on the home page and the vendor directory. The whole card links to the storefront. */
+export default function VendorCard({ vendor, productCount, from, className }: VendorCardProps) {
+  const state: VendorOriginState = { origin: from };
+
   return (
     <Link
       to={`/vendors/${vendor.id}`}
-      className="group flex flex-col gap-5 rounded-hm-md border border-hm-border bg-hm-surface p-6 text-hm-text no-underline transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_44px_-24px_rgba(26,26,26,0.32)]"
+      state={state}
+      className={cn(
+        "group flex flex-col gap-5 rounded-hm-md border border-hm-border bg-hm-surface p-6 text-hm-text no-underline transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_44px_-24px_rgba(26,26,26,0.32)]",
+        className,
+      )}
     >
       <div className="flex items-start justify-between gap-4">
         <span

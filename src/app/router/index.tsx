@@ -8,6 +8,7 @@ import VendorLayout from "@/app/layouts/VendorLayout";
 import NotFoundPage from "@/app/NotFoundPage";
 import AuthPage from "@/features/auth/pages/AuthPage";
 import CartPage from "@/features/cart/pages/CartPage";
+import WishlistPage from "@/features/wishlist/pages/WishlistPage";
 import HomePage from "@/features/catalog/pages/HomePage";
 import ProductDetailPage from "@/features/catalog/pages/ProductDetailPage";
 import ProductsPage from "@/features/catalog/pages/ProductsPage";
@@ -68,6 +69,7 @@ export const router = createBrowserRouter([
           { path: "/products", element: <ProductsPage /> },
           { path: "/products/:id", element: <ProductDetailPage /> },
           { path: "/cart", element: <CartPage /> },
+          { path: "/wishlist", element: <WishlistPage /> },
           { path: "/orders", element: <OrdersPage /> },
           { path: "/orders/:id", element: <OrderDetailPage /> },
           { path: "/account", element: <ProfilePage /> },

@@ -5,6 +5,9 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import QuantityStepper from "@/components/QuantityStepper";
 import Rating from "@/components/Rating";
 import ProductReviews from "@/features/catalog/components/ProductReviews";
+import { useCart } from "@/features/cart/CartContext";
+import { useWishlist } from "@/features/wishlist/WishlistContext";
+import type { VendorOriginState } from "@/features/vendor-storefront/vendorOrigin";
 import { formatNaira } from "@/lib/format";
 import { products } from "@/lib/mock/products";
 import { reviewSummary } from "@/lib/mock/reviews";
@@ -16,6 +19,9 @@ export default function ProductDetailPage() {
   const vendor = findVendor(product.vendorId);
   const [quantity, setQuantity] = useState(1);
   const [stock, setStock] = useState(true);
+  const { isSaved, toggle } = useWishlist();
+  const { addItem } = useCart();
+  const saved = isSaved(product.id);
 
   return (
     <>
@@ -65,9 +71,16 @@ export default function ProductDetailPage() {
             ) : (
               <span>Out of stock</span>
             )}
-            <Button disabled={!stock}>Add to Cart</Button>
-            <Button variant="ghost" aria-label="Save to wishlist">
-              ♡
+            <Button disabled={!stock} onClick={() => addItem(product, quantity)}>
+              Add to Cart
+            </Button>
+            <Button
+              variant="ghost"
+              aria-pressed={saved}
+              aria-label={saved ? "Remove from wishlist" : "Save to wishlist"}
+              onClick={() => toggle(product.id)}
+            >
+              {saved ? "♥" : "♡"}
             </Button>
           </div>
 
@@ -83,7 +96,16 @@ export default function ProductDetailPage() {
                 <strong>{vendor.name}</strong>
                 <small className="mt-1 block text-hm-muted">{vendor.tagline}</small>
               </div>
-              <Link className="ml-auto shrink-0 text-[11px] text-hm-accent no-underline" to={`/vendors/${vendor.id}`}>
+              <Link
+                className="ml-auto shrink-0 text-[11px] text-hm-accent no-underline"
+                to={`/vendors/${vendor.id}`}
+                state={{
+                  origin: [
+                    { label: "Products", to: "/products" },
+                    { label: product.name, to: `/products/${product.id}` },
+                  ],
+                } satisfies VendorOriginState}
+              >
                 Visit storefront
               </Link>
             </article>
