@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate, type Location } from "react-router";
 import Button from "@/components/Button";
 import { useMotionPresets } from "@/lib/motion";
 import { ApiError } from "@/lib/api/client";
@@ -8,19 +8,23 @@ import { useLogin } from "@/features/auth/api";
 import AuthField from "@/features/auth/components/AuthField";
 import AuthHeader from "@/features/auth/components/AuthHeader";
 import ErrorBanner from "@/features/auth/components/ErrorBanner";
-import type { AuthNavigate } from "@/features/auth/types";
+import type { AuthNavigate, AuthNoticeTone } from "@/features/auth/types";
 
 export default function LoginForm({
   onNavigate,
   notice,
+  noticeTone = "success",
 }: {
   onNavigate: AuthNavigate;
   notice?: string;
+  noticeTone?: AuthNoticeTone;
 }) {
   const [error, setError] = useState("");
   const { rise } = useMotionPresets();
   const login = useLogin();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as { from?: Location } | null)?.from?.pathname ?? "/";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -36,7 +40,7 @@ export default function LoginForm({
     setError("");
     try {
       await login.mutateAsync({ email, password });
-      navigate("/");
+      navigate(from, { replace: true });
     } catch (err) {
       setError(
         err instanceof ApiError
@@ -54,7 +58,7 @@ export default function LoginForm({
         description="Your favourite finds and trusted vendors are waiting."
       />
       <form className="mt-12 flex flex-col gap-6 max-[520px]:mt-8" onSubmit={handleSubmit} noValidate>
-        {!error && notice && <ErrorBanner tone="success">{notice}</ErrorBanner>}
+        {!error && notice && <ErrorBanner tone={noticeTone}>{notice}</ErrorBanner>}
         {error && <ErrorBanner>{error}</ErrorBanner>}
         <AuthField
           id="login-email"

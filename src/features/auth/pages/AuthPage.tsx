@@ -1,17 +1,22 @@
 import { useState } from "react";
+import { useLocation } from "react-router";
 import Brand from "@/components/Brand";
 import ForgotPasswordForm from "@/features/auth/components/ForgotPasswordForm";
 import LoginForm from "@/features/auth/components/LoginForm";
 import RegisterForm from "@/features/auth/components/RegisterForm";
-import type { AuthNavigate, AuthScreen } from "@/features/auth/types";
+import type { AuthNavigate, AuthNoticeTone, AuthScreen } from "@/features/auth/types";
 
 export default function AuthPage({ initialScreen = "login" }: { initialScreen?: AuthScreen }) {
+  const location = useLocation();
   const [screen, setScreen] = useState<AuthScreen>(initialScreen);
-  const [notice, setNotice] = useState("");
+  // Seeded once from RequireAuth's redirect state (e.g. "Sign in to continue."), if that's how we got here.
+  const [notice, setNotice] = useState(() => (location.state as { notice?: string } | null)?.notice ?? "");
+  const [noticeTone, setNoticeTone] = useState<AuthNoticeTone>("info");
 
-  const navigate: AuthNavigate = (next, nextNotice = "") => {
+  const navigate: AuthNavigate = (next, nextNotice = "", tone = "success") => {
     setScreen(next);
     setNotice(nextNotice);
+    setNoticeTone(tone);
   };
 
   return (
@@ -35,7 +40,7 @@ export default function AuthPage({ initialScreen = "login" }: { initialScreen?: 
         aria-live="polite"
         className="relative z-[1] mx-auto my-12 w-[min(100%,424px)] self-center rounded-hm-md border border-hm-text/[0.06] bg-white/[0.92] p-12 backdrop-blur-[20px] max-[520px]:my-8 max-[520px]:min-h-0 max-[520px]:px-6 max-[520px]:py-8 min-h-[540px]"
       >
-        {screen === "login" && <LoginForm onNavigate={navigate} notice={notice} />}
+        {screen === "login" && <LoginForm onNavigate={navigate} notice={notice} noticeTone={noticeTone} />}
         {screen === "register" && <RegisterForm onNavigate={navigate} />}
         {screen === "forgot" && <ForgotPasswordForm onNavigate={navigate} />}
       </section>

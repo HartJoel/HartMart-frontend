@@ -7,6 +7,9 @@ import StorefrontLayout from "@/app/layouts/StorefrontLayout";
 import VendorLayout from "@/app/layouts/VendorLayout";
 import NotFoundPage from "@/app/NotFoundPage";
 import AuthPage from "@/features/auth/pages/AuthPage";
+import RequireAuth from "@/features/auth/guards/RequireAuth";
+import RequireGuest from "@/features/auth/guards/RequireGuest";
+import RequireRole from "@/features/auth/guards/RequireRole";
 import CartPage from "@/features/cart/pages/CartPage";
 import WishlistPage from "@/features/wishlist/pages/WishlistPage";
 import HomePage from "@/features/catalog/pages/HomePage";
@@ -44,9 +47,14 @@ export const router = createBrowserRouter([
       {
         element: <StandaloneLayout />,
         children: [
-          { path: "/login", element: <AuthPage initialScreen="login" /> },
-          { path: "/register", element: <AuthPage initialScreen="register" /> },
-          { path: "/forgot-password", element: <AuthPage initialScreen="forgot" /> },
+          {
+            element: <RequireGuest />,
+            children: [
+              { path: "/login", element: <AuthPage initialScreen="login" /> },
+              { path: "/register", element: <AuthPage initialScreen="register" /> },
+              { path: "/forgot-password", element: <AuthPage initialScreen="forgot" /> },
+            ],
+          },
           { path: "/payment/callback", element: <PaymentCallbackPage /> },
           { path: "*", element: <NotFoundPage /> },
         ],
@@ -56,8 +64,13 @@ export const router = createBrowserRouter([
       {
         element: <FocusedLayout />,
         children: [
-          { path: "/checkout", element: <CheckoutPage /> },
-          { path: "/become-a-vendor", element: <VendorApplicationPage /> },
+          {
+            element: <RequireAuth />,
+            children: [
+              { path: "/checkout", element: <CheckoutPage /> },
+              { path: "/become-a-vendor", element: <VendorApplicationPage /> },
+            ],
+          },
         ],
       },
 
@@ -68,45 +81,60 @@ export const router = createBrowserRouter([
           { path: "/", element: <HomePage /> },
           { path: "/products", element: <ProductsPage /> },
           { path: "/products/:id", element: <ProductDetailPage /> },
-          { path: "/cart", element: <CartPage /> },
-          { path: "/wishlist", element: <WishlistPage /> },
-          { path: "/orders", element: <OrdersPage /> },
-          { path: "/orders/:id", element: <OrderDetailPage /> },
-          { path: "/account", element: <ProfilePage /> },
-          { path: "/account/addresses", element: <AddressesPage /> },
-          { path: "/notifications", element: <NotificationsPage /> },
           { path: "/vendors", element: <VendorDirectoryPage /> },
           { path: "/vendors/:id", element: <VendorStorefrontPage /> },
+          {
+            element: <RequireAuth />,
+            children: [
+              { path: "/cart", element: <CartPage /> },
+              { path: "/wishlist", element: <WishlistPage /> },
+              { path: "/orders", element: <OrdersPage /> },
+              { path: "/orders/:id", element: <OrderDetailPage /> },
+              { path: "/account", element: <ProfilePage /> },
+              { path: "/account/addresses", element: <AddressesPage /> },
+              { path: "/notifications", element: <NotificationsPage /> },
+            ],
+          },
         ],
       },
 
       {
-        path: "/vendor",
-        element: <VendorLayout />,
+        element: <RequireRole role="VENDOR" />,
         children: [
-          { index: true, element: <VendorDashboardPage /> },
-          { path: "dashboard", element: <VendorDashboardPage /> },
-          { path: "products", element: <VendorProductsPage /> },
-          { path: "products/new", element: <VendorProductFormPage /> },
-          { path: "products/:id/edit", element: <VendorProductFormPage /> },
-          { path: "orders", element: <VendorOrdersPage /> },
-          { path: "reviews", element: <VendorReviewsPage /> },
-          { path: "settings", element: <VendorSettingsPage /> },
-          { path: "notifications", element: <NotificationsPage area="vendor" /> },
+          {
+            path: "/vendor",
+            element: <VendorLayout />,
+            children: [
+              { index: true, element: <VendorDashboardPage /> },
+              { path: "dashboard", element: <VendorDashboardPage /> },
+              { path: "products", element: <VendorProductsPage /> },
+              { path: "products/new", element: <VendorProductFormPage /> },
+              { path: "products/:id/edit", element: <VendorProductFormPage /> },
+              { path: "orders", element: <VendorOrdersPage /> },
+              { path: "reviews", element: <VendorReviewsPage /> },
+              { path: "settings", element: <VendorSettingsPage /> },
+              { path: "notifications", element: <NotificationsPage area="vendor" /> },
+            ],
+          },
         ],
       },
 
       {
-        path: "/admin",
-        element: <AdminLayout />,
+        element: <RequireRole role="ADMIN" />,
         children: [
-          { index: true, element: <AdminDashboardPage /> },
-          { path: "users", element: <AdminUsersPage /> },
-          { path: "vendors", element: <AdminVendorsPage /> },
-          { path: "categories", element: <AdminCategoriesPage /> },
-          { path: "reports", element: <AdminReportsPage /> },
-          { path: "logs", element: <AdminLogsPage /> },
-          { path: "notifications", element: <NotificationsPage area="admin" /> },
+          {
+            path: "/admin",
+            element: <AdminLayout />,
+            children: [
+              { index: true, element: <AdminDashboardPage /> },
+              { path: "users", element: <AdminUsersPage /> },
+              { path: "vendors", element: <AdminVendorsPage /> },
+              { path: "categories", element: <AdminCategoriesPage /> },
+              { path: "reports", element: <AdminReportsPage /> },
+              { path: "logs", element: <AdminLogsPage /> },
+              { path: "notifications", element: <NotificationsPage area="admin" /> },
+            ],
+          },
         ],
       },
     ],
