@@ -1,34 +1,59 @@
 import { useMemo, useState, type ChangeEvent } from "react";
 import { AnimatePresence } from "framer-motion";
-import DataTable, { tableCell, tableHeadCell } from "@/components/DataTable";
-import PageHeader from "@/components/PageHeader";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import StatusBadge from "@/components/StatusBadge";
-import { cn } from "@/lib/cn";
+import Button from "@/components/Button";
+import DataTable, { tableCell, tableHeadCell } from "@/components/DataTable";
 import Icon from "@/components/Icon";
+import PageHeader from "@/components/PageHeader";
+import StatusBadge from "@/components/StatusBadge";
 import UserDrawer from "@/features/admin/components/UserDrawer";
-import { initialsOf, users, type AdminUser } from "@/features/admin/mock";
+import { useUsers } from "@/features/admin/api";
+import { getInitials } from "@/lib/format";
+import { cn } from "@/lib/cn";
 
 const selectClass = "min-h-[46px] rounded-hm-sm border-0 bg-hm-surface px-3 text-[10px] outline-0";
 
+const PAGE_SIZE = 10;
+
+const roleOptions = [
+  { label: "All roles", value: undefined },
+  { label: "Customer", value: "CUSTOMER" },
+  { label: "Vendor", value: "VENDOR" },
+  { label: "Admin", value: "ADMIN" },
+];
+
+const statusOptions = [
+  { label: "All statuses", value: undefined },
+  { label: "Active", value: "ACTIVE" },
+  { label: "Suspended", value: "SUSPENDED" },
+];
+
 export default function UsersPage() {
   const [search, setSearch] = useState("");
-  const [role, setRole] = useState("All roles");
-  const [status, setStatus] = useState("All statuses");
-  const [selected, setSelected] = useState<AdminUser | null>(null);
+  const [role, setRole] = useState<string | undefined>(undefined);
+  const [status, setStatus] = useState<string | undefined>(undefined);
+  const [page, setPage] = useState(1);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const filtered = useMemo(
-    () =>
-      users.filter((user) => {
-        const query = search.toLowerCase();
-        return (
-          (!query || `${user.name} ${user.email}`.toLowerCase().includes(query)) &&
-          (role === "All roles" || user.role === role) &&
-          (status === "All statuses" || user.status === status)
-        );
-      }),
-    [search, role, status],
-  );
+  const { data, isPending, isError, refetch } = useUsers({ role, status, page, limit: PAGE_SIZE });
+
+  // The API only filters by role/status; search narrows within whatever page came back.
+  const filtered = useMemo(() => {
+    const rows = data?.data ?? [];
+    const query = search.trim().toLowerCase();
+    if (!query) return rows;
+    return rows.filter((user) => `${user.name} ${user.email}`.toLowerCase().includes(query));
+  }, [data, search]);
+
+  function updateRole(event: ChangeEvent<HTMLSelectElement>) {
+    setRole(event.target.value || undefined);
+    setPage(1);
+  }
+
+  function updateStatus(event: ChangeEvent<HTMLSelectElement>) {
+    setStatus(event.target.value || undefined);
+    setPage(1);
+  }
 
   return (
     <>
@@ -46,69 +71,118 @@ export default function UsersPage() {
             aria-label="Search users"
             className="w-full border-0 bg-transparent text-[11px] outline-0"
             type="search"
-            placeholder="Search name or email"
+            placeholder="Search this page by name or email"
             value={search}
             onChange={(event: ChangeEvent<HTMLInputElement>) => setSearch(event.target.value)}
           />
         </div>
-        <select aria-label="Filter by role" className={selectClass} value={role} onChange={(event) => setRole(event.target.value)}>
-          <option>All roles</option>
-          <option>Customer</option>
-          <option>Vendor</option>
-          <option>Admin</option>
+        <select aria-label="Filter by role" className={selectClass} value={role ?? ""} onChange={updateRole}>
+          {roleOptions.map((option) => (
+            <option key={option.label} value={option.value ?? ""}>
+              {option.label}
+            </option>
+          ))}
         </select>
-        <select aria-label="Filter by status" className={selectClass} value={status} onChange={(event) => setStatus(event.target.value)}>
-          <option>All statuses</option>
-          <option>Active</option>
-          <option>Suspended</option>
+        <select aria-label="Filter by status" className={selectClass} value={status ?? ""} onChange={updateStatus}>
+          {statusOptions.map((option) => (
+            <option key={option.label} value={option.value ?? ""}>
+              {option.label}
+            </option>
+          ))}
         </select>
         <span className="self-center text-[9px] text-hm-muted max-[760px]:justify-self-end max-[480px]:justify-self-start">
-          {filtered.length} results
+          {data ? `${filtered.length} of ${data.pagination.total} results` : "—"}
         </span>
       </div>
 
-      <DataTable>
-        <thead>
-          <tr>
-            <th className={tableHeadCell}>User</th>
-            <th className={tableHeadCell}>Role</th>
-            <th className={tableHeadCell}>Status</th>
-            <th className={tableHeadCell}>Joined</th>
-            <th className={tableHeadCell}>Orders</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.map((user) => (
-            <tr
-              key={user.id}
-              tabIndex={0}
-              onClick={() => setSelected(user)}
-              className="cursor-pointer focus-visible:outline-[3px] focus-visible:outline-[rgba(79,70,229,0.24)] focus-visible:outline-offset-[3px]"
-            >
-              <td className={tableCell}>
-                <div className="flex items-center gap-3">
-                  <span className="grid size-9 place-items-center rounded-full bg-hm-field text-[9px] font-[700] text-hm-text">
-                    {initialsOf(user.name)}
-                  </span>
-                  <div>
-                    <div className="font-[650] text-hm-text">{user.name}</div>
-                    <div className="mt-[3px] text-[8px]">{user.email}</div>
-                  </div>
-                </div>
-              </td>
-              <td className={tableCell}>{user.role}</td>
-              <td className={tableCell}>
-                <StatusBadge tone={user.status === "Active" ? "success" : "danger"}>{user.status}</StatusBadge>
-              </td>
-              <td className={tableCell}>{user.joined}</td>
-              <td className={cn(tableCell, "font-[650] text-hm-text")}>{user.orders}</td>
+      {isError ? (
+        <div className="grid place-items-center gap-4 rounded-hm-md bg-hm-surface px-6 py-16 text-center">
+          <p className="m-0 text-[13px] text-hm-muted">Couldn&apos;t load users. Please try again.</p>
+          <Button variant="ghost" size="sm" onClick={() => refetch()}>
+            Retry
+          </Button>
+        </div>
+      ) : (
+        <DataTable>
+          <thead>
+            <tr>
+              <th className={tableHeadCell}>User</th>
+              <th className={tableHeadCell}>Role</th>
+              <th className={tableHeadCell}>Status</th>
             </tr>
-          ))}
-        </tbody>
-      </DataTable>
+          </thead>
+          <tbody>
+            {isPending
+              ? Array.from({ length: 5 }).map((_, index) => (
+                  <tr key={index}>
+                    <td className={tableCell} colSpan={3}>
+                      <div className="h-5 animate-pulse rounded-hm-sm bg-hm-field" />
+                    </td>
+                  </tr>
+                ))
+              : filtered.length === 0
+                ? (
+                    <tr>
+                      <td className={tableCell} colSpan={3}>
+                        No users match these filters.
+                      </td>
+                    </tr>
+                  )
+                : filtered.map((user) => (
+                    <tr
+                      key={user.id}
+                      tabIndex={0}
+                      onClick={() => setSelectedId(user.id)}
+                      className="cursor-pointer focus-visible:outline-[3px] focus-visible:outline-[rgba(79,70,229,0.24)] focus-visible:outline-offset-[3px]"
+                    >
+                      <td className={tableCell}>
+                        <div className="flex items-center gap-3">
+                          <span className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-hm-field text-[9px] font-[700] text-hm-text">
+                            {user.avatar ? (
+                              <img src={user.avatar.url} alt="" className="size-full object-cover" />
+                            ) : (
+                              getInitials(user.name)
+                            )}
+                          </span>
+                          <div>
+                            <div className="font-[650] text-hm-text">{user.name}</div>
+                            <div className="mt-[3px] text-[8px]">{user.email}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className={cn(tableCell, "capitalize")}>{user.role.toLowerCase()}</td>
+                      <td className={tableCell}>
+                        <StatusBadge tone={user.status === "ACTIVE" ? "success" : "danger"} className="capitalize">
+                          {user.status.toLowerCase()}
+                        </StatusBadge>
+                      </td>
+                    </tr>
+                  ))}
+          </tbody>
+        </DataTable>
+      )}
+
+      {data && data.pagination.pages > 1 && (
+        <div className="mt-5 flex items-center justify-end gap-3">
+          <span className="text-[9px] text-hm-muted">
+            Page {data.pagination.page} of {data.pagination.pages}
+          </span>
+          <Button variant="quiet" size="sm" disabled={page <= 1} onClick={() => setPage((current) => current - 1)}>
+            Previous
+          </Button>
+          <Button
+            variant="quiet"
+            size="sm"
+            disabled={page >= data.pagination.pages}
+            onClick={() => setPage((current) => current + 1)}
+          >
+            Next
+          </Button>
+        </div>
+      )}
 
       <AnimatePresence>
-        {selected && <UserDrawer user={selected} onClose={() => setSelected(null)} />}
+        {selectedId && <UserDrawer userId={selectedId} onClose={() => setSelectedId(null)} />}
       </AnimatePresence>
     </>
   );

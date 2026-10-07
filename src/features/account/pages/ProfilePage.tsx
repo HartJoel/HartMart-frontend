@@ -4,43 +4,61 @@ import Button from "@/components/Button";
 import PageHeader from "@/components/PageHeader";
 import TextField from "@/components/TextField";
 import AccountShell from "@/features/account/components/AccountShell";
+import { useUpdateProfile } from "@/features/auth/api";
+import { useAuthStore } from "@/features/auth/store";
 import { getInitials } from "@/lib/format";
-import { savedProfile } from "@/lib/mock/account";
 
 const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
 
-type Profile = {
+type Draft = {
   name: string;
-  avatarUrl: string | null;
+  avatarFile: File | null;
+  /** Preview URL: the uploaded photo's URL, or an object URL for a picked-but-unsaved file. */
+  avatarPreview: string | null;
 };
 
 export default function ProfilePage() {
-  const email = savedProfile.email;
-  const [saved, setSaved] = useState<Profile>({ name: savedProfile.name, avatarUrl: savedProfile.avatarUrl });
-  const [draft, setDraft] = useState<Profile>(saved);
+  const user = useAuthStore((state) => state.user);
+  const updateProfile = useUpdateProfile();
+
+  const [draft, setDraft] = useState<Draft>({ name: user?.name ?? "", avatarFile: null, avatarPreview: user?.avatar?.url ?? null });
   const [nameTouched, setNameTouched] = useState(false);
   const [avatarError, setAvatarError] = useState<string | undefined>();
   const [justSaved, setJustSaved] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
-  // Object URL for a photo picked but not yet saved, so it can be released when replaced or discarded.
-  const draftUrl = useRef<string | null>(null);
+  const draftObjectUrl = useRef<string | null>(null);
+
+  // Keep the draft in sync once the signed-in user loads or changes elsewhere (e.g. a save from another tab).
+  useEffect(() => {
+    if (!user) return;
+    setDraft((current) => (current.avatarFile ? current : { name: user.name, avatarFile: null, avatarPreview: user.avatar?.url ?? null }));
+  }, [user]);
 
   useEffect(() => {
     return () => {
-      if (draftUrl.current) URL.revokeObjectURL(draftUrl.current);
+      if (draftObjectUrl.current) URL.revokeObjectURL(draftObjectUrl.current);
     };
   }, []);
 
+  if (!user) {
+    return (
+      <AccountShell>
+        <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Account" }]} />
+        <div className="h-[280px] max-w-[600px] animate-pulse rounded-hm-md border border-hm-border bg-hm-field" />
+      </AccountShell>
+    );
+  }
+
   const nameError = nameTouched && draft.name.trim().length < 2 ? "Enter your full name." : undefined;
   const isValid = !nameError && !avatarError;
-  const isDirty = draft.name.trim() !== saved.name || draft.avatarUrl !== saved.avatarUrl;
-  const statusMessage = justSaved ? "Profile updated." : isDirty ? "You have unsaved changes." : "";
-
-  function replaceDraftAvatar(url: string | null) {
-    if (draftUrl.current) URL.revokeObjectURL(draftUrl.current);
-    draftUrl.current = url;
-    setDraft((current) => ({ ...current, avatarUrl: url }));
-  }
+  const isDirty = draft.name.trim() !== user.name || draft.avatarFile !== null;
+  const statusMessage = justSaved
+    ? "Profile updated."
+    : updateProfile.isError
+      ? "Couldn't save your changes. Try again."
+      : isDirty
+        ? "You have unsaved changes."
+        : "";
 
   function handleFile(file: File | undefined) {
     if (!file) return;
@@ -54,7 +72,10 @@ export default function ProfilePage() {
     }
     setAvatarError(undefined);
     setJustSaved(false);
-    replaceDraftAvatar(URL.createObjectURL(file));
+    if (draftObjectUrl.current) URL.revokeObjectURL(draftObjectUrl.current);
+    const previewUrl = URL.createObjectURL(file);
+    draftObjectUrl.current = previewUrl;
+    setDraft((current) => ({ ...current, avatarFile: file, avatarPreview: previewUrl }));
   }
 
   function updateName(value: string) {
@@ -63,8 +84,12 @@ export default function ProfilePage() {
   }
 
   function discard() {
-    replaceDraftAvatar(saved.avatarUrl);
-    setDraft(saved);
+    if (!user) return;
+    if (draftObjectUrl.current) {
+      URL.revokeObjectURL(draftObjectUrl.current);
+      draftObjectUrl.current = null;
+    }
+    setDraft({ name: user.name, avatarFile: null, avatarPreview: user.avatar?.url ?? null });
     setNameTouched(false);
     setAvatarError(undefined);
     setJustSaved(false);
@@ -75,12 +100,16 @@ export default function ProfilePage() {
     setNameTouched(true);
     if (!isValid || !isDirty) return;
 
-    const next = { name: draft.name.trim(), avatarUrl: draft.avatarUrl };
-    // The picked photo is now the saved one, so it must not be released.
-    draftUrl.current = null;
-    setSaved(next);
-    setDraft(next);
-    setJustSaved(true);
+    updateProfile.mutate(
+      { name: draft.name.trim(), avatar: draft.avatarFile ?? undefined },
+      {
+        onSuccess: () => {
+          draftObjectUrl.current = null;
+          setDraft((current) => ({ ...current, avatarFile: null }));
+          setJustSaved(true);
+        },
+      },
+    );
   }
 
   return (
@@ -100,10 +129,10 @@ export default function ProfilePage() {
             onClick={() => fileInput.current?.click()}
             className="group relative grid size-24 shrink-0 cursor-pointer place-items-center overflow-hidden rounded-full border-0 bg-hm-text p-0 text-[24px] font-[700] text-white"
           >
-            {draft.avatarUrl ? (
-              <img src={draft.avatarUrl} alt="" className="size-full object-cover" />
+            {draft.avatarPreview ? (
+              <img src={draft.avatarPreview} alt="" className="size-full object-cover" />
             ) : (
-              <span aria-hidden="true">{getInitials(draft.name)}</span>
+              <span aria-hidden="true">{getInitials(draft.name || user.name)}</span>
             )}
             <span
               aria-hidden="true"
@@ -125,8 +154,8 @@ export default function ProfilePage() {
           />
 
           <div className="min-w-0">
-            <p className="m-0 truncate text-[16px] font-[650]">{saved.name}</p>
-            <p className="m-0 mt-1 truncate text-[12px] text-hm-muted">{email}</p>
+            <p className="m-0 truncate text-[16px] font-[650]">{user.name}</p>
+            <p className="m-0 mt-1 truncate text-[12px] text-hm-muted">{user.email}</p>
             <p className="m-0 mt-3 text-[11px] text-hm-muted">JPG or PNG, up to 2 MB.</p>
             {avatarError && (
               <p role="alert" className="m-0 mt-2 text-[11px] text-hm-error">
@@ -151,7 +180,7 @@ export default function ProfilePage() {
             name="email"
             type="email"
             autoComplete="email"
-            value={email}
+            value={user.email}
             readOnly
             hint="Your email is tied to your sign-in and can't be changed here."
           />
@@ -161,11 +190,11 @@ export default function ProfilePage() {
           <p role="status" aria-live="polite" className="m-0 mr-auto text-[12px] text-hm-muted">
             {statusMessage}
           </p>
-          <Button variant="ghost" size="sm" onClick={discard} disabled={!isDirty}>
+          <Button variant="ghost" size="sm" onClick={discard} disabled={!isDirty || updateProfile.isPending}>
             Discard
           </Button>
-          <Button type="submit" size="sm" disabled={!isDirty || !isValid}>
-            Save changes
+          <Button type="submit" size="sm" disabled={!isDirty || !isValid || updateProfile.isPending}>
+            {updateProfile.isPending ? "Saving…" : "Save changes"}
           </Button>
         </div>
       </form>

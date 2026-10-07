@@ -1,25 +1,5 @@
 // Placeholder platform data until the admin API is wired.
 
-export type AdminUser = {
-  id: number;
-  name: string;
-  email: string;
-  role: "Customer" | "Vendor" | "Admin";
-  status: "Active" | "Suspended";
-  joined: string;
-  orders: number;
-  spent: string;
-};
-
-export const users: AdminUser[] = [
-  { id: 1, name: "Amara Okafor", email: "amara@example.com", role: "Customer", status: "Active", joined: "18 Jun 2025", orders: 12, spent: "₦284,500" },
-  { id: 2, name: "Ayo Balogun", email: "ayo@ajotech.ng", role: "Vendor", status: "Active", joined: "06 Jun 2025", orders: 0, spent: "₦0" },
-  { id: 3, name: "Tolu Adeyemi", email: "tolu@example.com", role: "Customer", status: "Active", joined: "28 May 2025", orders: 8, spent: "₦162,800" },
-  { id: 4, name: "Nneka Okoro", email: "nneka@example.com", role: "Customer", status: "Suspended", joined: "14 May 2025", orders: 3, spent: "₦48,200" },
-  { id: 5, name: "Kemi Adebayo", email: "kemi@hartmart.ng", role: "Admin", status: "Active", joined: "02 Apr 2025", orders: 0, spent: "₦0" },
-  { id: 6, name: "Chidi Eze", email: "chidi@example.com", role: "Customer", status: "Active", joined: "22 Mar 2025", orders: 19, spent: "₦510,400" },
-];
-
 export type VendorApplication = {
   id: number;
   store: string;
@@ -65,11 +45,3 @@ export const auditLogs = [
 ];
 
 export const revenueBars = [42, 58, 48, 72, 64, 80, 68, 91, 76, 100, 84, 94];
-
-/** Initials for an avatar, e.g. "Amara Okafor" -> "AO". */
-export function initialsOf(name: string) {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("");
-}

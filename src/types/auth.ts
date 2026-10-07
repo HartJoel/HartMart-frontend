@@ -1,13 +1,21 @@
 export type UserRole = "CUSTOMER" | "VENDOR" | "ADMIN";
 
+export type UserAvatar = {
+  url: string;
+  publicId: string;
+};
+
 export type AuthUser = {
   id: string;
   name: string;
   email: string;
   role: UserRole;
-  avatar?: string | null;
+  avatar?: UserAvatar | null;
   emailVerified?: boolean;
 };
+
+/** A row from the admin user directory (`GET /users`, `GET /users/:id`) — adds the account `status`. */
+export type AdminUserSummary = AuthUser & { status: string };
 
 export type LoginPayload = {
   email: string;

@@ -46,6 +46,25 @@ export function useMe() {
   });
 }
 
+/** Updates the signed-in user's name and/or avatar. Multipart: the API expects form-data, not JSON. */
+export function useUpdateProfile() {
+  const setUser = useAuthStore((state) => state.setUser);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ name, avatar }: { name: string; avatar?: File }) => {
+      const form = new FormData();
+      form.set("name", name);
+      if (avatar) form.set("avatar", avatar);
+      return apiRequest<MeResponse>(`${USERS_PREFIX}/me`, { method: "PATCH", body: form });
+    },
+    onSuccess: ({ user }) => {
+      setUser(user);
+      queryClient.setQueryData(["auth", "me"], { user });
+    },
+  });
+}
+
 /** Clears the session cookies server-side, then clears the store and drops the cached profile. */
 export function useLogout() {
   const clear = useAuthStore((state) => state.clear);
