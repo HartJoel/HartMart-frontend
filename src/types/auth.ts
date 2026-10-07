@@ -5,6 +5,7 @@ export type AuthUser = {
   name: string;
   email: string;
   role: UserRole;
+  avatar?: string | null;
   emailVerified?: boolean;
 };
 
@@ -26,4 +27,12 @@ export type RegisterPayload = {
 
 export type RegisterResponse = {
   user: AuthUser;
+};
+
+export type MeResponse = {
+  user: AuthUser;
+};
+
+export type RefreshResponse = {
+  accessToken: string;
 };

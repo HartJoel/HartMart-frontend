@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { Link, NavLink } from "react-router";
+import { NavLink, useNavigate } from "react-router";
+import { useLogout } from "@/features/auth/api";
 import RoleSwitcher from "@/features/auth/components/RoleSwitcher";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
 import { cn } from "@/lib/cn";
@@ -14,6 +15,16 @@ const navigation = [
 /** Sidebar layout shared by the account pages: profile, addresses, orders and notifications. */
 export default function AccountShell({ children }: { children: ReactNode }) {
   const { unreadCount } = useNotifications();
+  const logout = useLogout();
+  const navigate = useNavigate();
+
+  async function handleLogout() {
+    try {
+      await logout.mutateAsync();
+    } finally {
+      navigate("/login");
+    }
+  }
 
   return (
     <div className="grid grid-cols-[200px_1fr] gap-[70px] max-[900px]:gap-10 max-[600px]:grid-cols-1">
@@ -51,12 +62,14 @@ export default function AccountShell({ children }: { children: ReactNode }) {
               )}
             </NavLink>
           ))}
-          <Link
-            to="/login"
-            className="mt-3 rounded-[10px] p-3 text-[13px] font-[600] text-hm-error no-underline transition-colors duration-200 hover:bg-hm-error-soft max-[600px]:mt-0 max-[600px]:min-w-max"
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={logout.isPending}
+            className="mt-3 rounded-[10px] p-3 text-left text-[13px] font-[600] text-hm-error transition-colors duration-200 hover:bg-hm-error-soft disabled:opacity-60 max-[600px]:mt-0 max-[600px]:min-w-max"
           >
-            Logout
-          </Link>
+            {logout.isPending ? "Logging out…" : "Logout"}
+          </button>
         </nav>
       </div>
 
