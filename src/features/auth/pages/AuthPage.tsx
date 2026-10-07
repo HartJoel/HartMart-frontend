@@ -3,10 +3,16 @@ import Brand from "@/components/Brand";
 import ForgotPasswordForm from "@/features/auth/components/ForgotPasswordForm";
 import LoginForm from "@/features/auth/components/LoginForm";
 import RegisterForm from "@/features/auth/components/RegisterForm";
-import type { AuthScreen } from "@/features/auth/types";
+import type { AuthNavigate, AuthScreen } from "@/features/auth/types";
 
 export default function AuthPage({ initialScreen = "login" }: { initialScreen?: AuthScreen }) {
   const [screen, setScreen] = useState<AuthScreen>(initialScreen);
+  const [notice, setNotice] = useState("");
+
+  const navigate: AuthNavigate = (next, nextNotice = "") => {
+    setScreen(next);
+    setNotice(nextNotice);
+  };
 
   return (
     <main className="relative grid min-h-svh grid-rows-[auto_1fr_auto] overflow-hidden bg-hm-background px-6 pt-16 pb-6 max-[520px]:px-4 max-[520px]:pt-8 max-[520px]:pb-5">
@@ -29,9 +35,9 @@ export default function AuthPage({ initialScreen = "login" }: { initialScreen?: 
         aria-live="polite"
         className="relative z-[1] mx-auto my-12 w-[min(100%,424px)] self-center rounded-hm-md border border-hm-text/[0.06] bg-white/[0.92] p-12 backdrop-blur-[20px] max-[520px]:my-8 max-[520px]:min-h-0 max-[520px]:px-6 max-[520px]:py-8 min-h-[540px]"
       >
-        {screen === "login" && <LoginForm onNavigate={setScreen} />}
-        {screen === "register" && <RegisterForm onNavigate={setScreen} />}
-        {screen === "forgot" && <ForgotPasswordForm onNavigate={setScreen} />}
+        {screen === "login" && <LoginForm onNavigate={navigate} notice={notice} />}
+        {screen === "register" && <RegisterForm onNavigate={navigate} />}
+        {screen === "forgot" && <ForgotPasswordForm onNavigate={navigate} />}
       </section>
 
       <div className="relative z-[1] text-center text-[12px] text-hm-muted">

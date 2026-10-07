@@ -4,10 +4,10 @@ import Button from "@/components/Button";
 import AuthField from "@/features/auth/components/AuthField";
 import AuthHeader from "@/features/auth/components/AuthHeader";
 import ErrorBanner from "@/features/auth/components/ErrorBanner";
-import type { AuthScreen } from "@/features/auth/types";
+import type { AuthNavigate } from "@/features/auth/types";
 import { useMotionPresets } from "@/lib/motion";
 
-export default function ForgotPasswordForm({ onNavigate }: { onNavigate: (screen: AuthScreen) => void }) {
+export default function ForgotPasswordForm({ onNavigate }: { onNavigate: AuthNavigate }) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);

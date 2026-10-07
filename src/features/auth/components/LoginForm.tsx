@@ -1,17 +1,28 @@
 import { useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router";
 import Button from "@/components/Button";
 import { useMotionPresets } from "@/lib/motion";
+import { ApiError } from "@/lib/api/client";
+import { useLogin } from "@/features/auth/api";
 import AuthField from "@/features/auth/components/AuthField";
 import AuthHeader from "@/features/auth/components/AuthHeader";
 import ErrorBanner from "@/features/auth/components/ErrorBanner";
-import type { AuthScreen } from "@/features/auth/types";
+import type { AuthNavigate } from "@/features/auth/types";
 
-export default function LoginForm({ onNavigate }: { onNavigate: (screen: AuthScreen) => void }) {
+export default function LoginForm({
+  onNavigate,
+  notice,
+}: {
+  onNavigate: AuthNavigate;
+  notice?: string;
+}) {
   const [error, setError] = useState("");
   const { rise } = useMotionPresets();
+  const login = useLogin();
+  const navigate = useNavigate();
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const email = String(data.get("email") ?? "").trim();
@@ -22,7 +33,17 @@ export default function LoginForm({ onNavigate }: { onNavigate: (screen: AuthScr
       return;
     }
 
-    setError("We couldn’t sign you in with those details. Please check them and try again.");
+    setError("");
+    try {
+      await login.mutateAsync({ email, password });
+      navigate("/");
+    } catch (err) {
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : "We couldn’t sign you in with those details. Please check them and try again.",
+      );
+    }
   }
 
   return (
@@ -33,6 +54,7 @@ export default function LoginForm({ onNavigate }: { onNavigate: (screen: AuthScr
         description="Your favourite finds and trusted vendors are waiting."
       />
       <form className="mt-12 flex flex-col gap-6 max-[520px]:mt-8" onSubmit={handleSubmit} noValidate>
+        {!error && notice && <ErrorBanner tone="success">{notice}</ErrorBanner>}
         {error && <ErrorBanner>{error}</ErrorBanner>}
         <AuthField
           id="login-email"
@@ -55,8 +77,8 @@ export default function LoginForm({ onNavigate }: { onNavigate: (screen: AuthScr
             Forgot password?
           </Button>
         </div>
-        <Button type="submit" size="lg">
-          Sign In
+        <Button type="submit" size="lg" disabled={login.isPending}>
+          {login.isPending ? "Signing in…" : "Sign In"}
         </Button>
       </form>
       <div className="mt-8 flex items-center justify-center gap-2 text-[13px] text-hm-muted max-[520px]:flex-wrap">

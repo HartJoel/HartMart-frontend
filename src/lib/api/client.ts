@@ -1,5 +1,12 @@
 const API_URL = import.meta.env.VITE_API_URL ?? "";
 
+/** Envelope every HartMart API response is wrapped in. */
+type ApiEnvelope<T> = {
+  success: boolean;
+  message: string;
+  data: T;
+};
+
 export class ApiError extends Error {
   readonly status: number;
 
@@ -10,14 +17,17 @@ export class ApiError extends Error {
   }
 }
 
-/** Shared JSON client. Feature `api.ts` files build TanStack Query hooks on top of this. */
+
 export async function apiRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers);
   if (!headers.has("Content-Type")) headers.set("Content-Type", "application/json");
 
-  const response = await fetch(`${API_URL}${path}`, { ...init, headers });
+  const response = await fetch(`${API_URL}${path}`, { ...init, headers, credentials: "include" });
+  const body = (await response.json().catch(() => null)) as ApiEnvelope<T> | null;
+
   if (!response.ok) {
-    throw new ApiError(`Request failed with status ${response.status}`, response.status);
+    throw new ApiError(body?.message ?? `Request failed with status ${response.status}`, response.status);
   }
-  return (await response.json()) as T;
+
+  return (body as ApiEnvelope<T>).data;
 }

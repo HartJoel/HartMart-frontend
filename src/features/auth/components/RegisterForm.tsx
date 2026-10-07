@@ -2,26 +2,41 @@ import { useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
 import Button from "@/components/Button";
 import { useMotionPresets } from "@/lib/motion";
+import { ApiError } from "@/lib/api/client";
+import { useRegister } from "@/features/auth/api";
 import AuthField from "@/features/auth/components/AuthField";
 import AuthHeader from "@/features/auth/components/AuthHeader";
 import ErrorBanner from "@/features/auth/components/ErrorBanner";
-import type { AuthScreen } from "@/features/auth/types";
+import type { AuthNavigate } from "@/features/auth/types";
 
-export default function RegisterForm({ onNavigate }: { onNavigate: (screen: AuthScreen) => void }) {
+export default function RegisterForm({ onNavigate }: { onNavigate: AuthNavigate }) {
   const [error, setError] = useState("");
   const { rise } = useMotionPresets();
+  const register = useRegister();
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const values = ["name", "email", "password"].map((key) => String(data.get(key) ?? "").trim());
+    const name = String(data.get("name") ?? "").trim();
+    const email = String(data.get("email") ?? "").trim();
+    const password = String(data.get("password") ?? "").trim();
 
-    if (values.some((value) => !value)) {
+    if (!name || !email || !password) {
       setError("Please complete each field before creating your account.");
       return;
     }
 
-    onNavigate("login");
+    setError("");
+    try {
+      await register.mutateAsync({ name, email, password });
+      onNavigate("login", "Account created — sign in to continue.");
+    } catch (err) {
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : "We couldn’t create your account. Please check your details and try again.",
+      );
+    }
   }
 
   return (
@@ -57,8 +72,8 @@ export default function RegisterForm({ onNavigate }: { onNavigate: (screen: Auth
           autoComplete="new-password"
           placeholder="At least 8 characters"
         />
-        <Button type="submit" size="lg">
-          Create Account
+        <Button type="submit" size="lg" disabled={register.isPending}>
+          {register.isPending ? "Creating account…" : "Create Account"}
         </Button>
       </form>
       <div className="mt-8 flex items-center justify-center gap-2 text-[13px] text-hm-muted max-[520px]:flex-wrap">
