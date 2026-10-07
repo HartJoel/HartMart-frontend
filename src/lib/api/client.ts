@@ -52,7 +52,7 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
 
   if (response.status === 401 && !path.startsWith(AUTH_PREFIX) && (await refreshSession())) {
     const retry = await send<T>(path, init);
-    if (retry.response.ok) return (retry.body as ApiEnvelope<T>).data;
+    if (retry.response.ok) return (retry.body?.data as T) ?? (undefined as T);
     throw new ApiError(
       retry.body?.message ?? `Request failed with status ${retry.response.status}`,
       retry.response.status,
@@ -63,5 +63,6 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
     throw new ApiError(body?.message ?? `Request failed with status ${response.status}`, response.status);
   }
 
-  return (body as ApiEnvelope<T>).data;
+  // A DELETE with no response body (e.g. Delete Address) parses to a null `body`.
+  return (body?.data as T) ?? (undefined as T);
 }

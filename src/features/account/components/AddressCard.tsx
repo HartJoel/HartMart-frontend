@@ -16,22 +16,19 @@ export default function AddressCard({ address, onEdit, onDelete, onSetDefault }:
     <article className="flex min-h-[220px] flex-col rounded-hm-md border border-hm-border bg-hm-surface p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-wrap items-center gap-2.5">
-          <h3 className="m-0 text-[15px] font-[650]">{address.label}</h3>
+          <h3 className="m-0 text-[15px] font-[650]">{address.addressLine}</h3>
           {address.isDefault && <StatusBadge tone="neutral">Default</StatusBadge>}
         </div>
         <div className="flex shrink-0 gap-1">
-          <IconButton icon="edit" label={`Edit ${address.label} address`} onClick={onEdit} />
-          <IconButton icon="trash" label={`Delete ${address.label} address`} onClick={onDelete} danger />
+          <IconButton icon="edit" label="Edit address" onClick={onEdit} />
+          <IconButton icon="trash" label="Delete address" onClick={onDelete} danger />
         </div>
       </div>
 
       <address className="mt-4 text-[12px] leading-[1.7] text-hm-muted not-italic">
-        <span className="block font-[600] text-hm-text">{address.fullName}</span>
-        {address.line1}
+        {address.city}, {address.state} {address.zipCode}
         <br />
-        {address.city}, {address.state}
-        <br />
-        {address.phone}
+        {address.country}
       </address>
 
       {!address.isDefault && (

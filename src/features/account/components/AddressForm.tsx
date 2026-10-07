@@ -9,36 +9,32 @@ type AddressFormProps = {
   initial?: AddressInput;
   onSubmit: (value: AddressInput) => void;
   onCancel: () => void;
+  isSubmitting?: boolean;
 };
 
 const emptyAddress: AddressInput = {
-  label: "",
-  fullName: "",
-  phone: "",
-  line1: "",
+  addressLine: "",
   city: "",
   state: "",
+  country: "Nigeria",
+  zipCode: "",
   isDefault: false,
 };
 
 function validate(values: AddressInput): Partial<Record<AddressField, string>> {
   const errors: Partial<Record<AddressField, string>> = {};
-  const phoneDigits = values.phone.replace(/\D/g, "").length;
 
-  if (!values.label.trim()) errors.label = "Name this address, for example Home.";
-  if (values.fullName.trim().length < 2) errors.fullName = "Enter the recipient's full name.";
-  if (!/^\+?[\d\s-]+$/.test(values.phone.trim()) || phoneDigits < 10) {
-    errors.phone = "Enter a phone number with at least 10 digits.";
-  }
-  if (values.line1.trim().length < 5) errors.line1 = "Enter the street address.";
+  if (values.addressLine.trim().length < 5) errors.addressLine = "Enter the street address.";
   if (!values.city.trim()) errors.city = "Enter the city.";
   if (!values.state.trim()) errors.state = "Enter the state.";
+  if (!values.country.trim()) errors.country = "Enter the country.";
+  if (!/^[A-Za-z0-9\s-]{3,10}$/.test(values.zipCode.trim())) errors.zipCode = "Enter a valid zip/postal code.";
 
   return errors;
 }
 
 /** Add or edit an address. Errors show once a field has been left, and Save stays disabled until the form is valid. */
-export default function AddressForm({ initial = emptyAddress, onSubmit, onCancel }: AddressFormProps) {
+export default function AddressForm({ initial = emptyAddress, onSubmit, onCancel, isSubmitting }: AddressFormProps) {
   const [values, setValues] = useState<AddressInput>(initial);
   const [touched, setTouched] = useState<Partial<Record<AddressField, boolean>>>({});
 
@@ -60,65 +56,33 @@ export default function AddressForm({ initial = emptyAddress, onSubmit, onCancel
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setTouched({
-      label: true,
-      fullName: true,
-      phone: true,
-      line1: true,
+      addressLine: true,
       city: true,
       state: true,
+      country: true,
+      zipCode: true,
     });
     if (!isValid) return;
 
     onSubmit({
-      label: values.label.trim(),
-      fullName: values.fullName.trim(),
-      phone: values.phone.trim(),
-      line1: values.line1.trim(),
+      addressLine: values.addressLine.trim(),
       city: values.city.trim(),
       state: values.state.trim(),
+      country: values.country.trim(),
+      zipCode: values.zipCode.trim(),
       isDefault: values.isDefault,
     });
   }
 
   return (
     <form noValidate onSubmit={handleSubmit} className="grid gap-5">
-      <div className="grid grid-cols-2 gap-4 max-[480px]:grid-cols-1">
-        <TextField
-          label="Address name"
-          placeholder="Home, Office"
-          value={values.label}
-          onChange={(event) => setField("label", event.target.value)}
-          onBlur={() => touch("label")}
-          error={errorFor("label")}
-        />
-        <TextField
-          label="Recipient name"
-          autoComplete="name"
-          value={values.fullName}
-          onChange={(event) => setField("fullName", event.target.value)}
-          onBlur={() => touch("fullName")}
-          error={errorFor("fullName")}
-        />
-      </div>
-
-      <TextField
-        label="Phone number"
-        type="tel"
-        autoComplete="tel"
-        placeholder="+234 803 000 0000"
-        value={values.phone}
-        onChange={(event) => setField("phone", event.target.value)}
-        onBlur={() => touch("phone")}
-        error={errorFor("phone")}
-      />
-
       <TextField
         label="Street address"
         autoComplete="street-address"
-        value={values.line1}
-        onChange={(event) => setField("line1", event.target.value)}
-        onBlur={() => touch("line1")}
-        error={errorFor("line1")}
+        value={values.addressLine}
+        onChange={(event) => setField("addressLine", event.target.value)}
+        onBlur={() => touch("addressLine")}
+        error={errorFor("addressLine")}
       />
 
       <div className="grid grid-cols-2 gap-4 max-[480px]:grid-cols-1">
@@ -140,6 +104,25 @@ export default function AddressForm({ initial = emptyAddress, onSubmit, onCancel
         />
       </div>
 
+      <div className="grid grid-cols-2 gap-4 max-[480px]:grid-cols-1">
+        <TextField
+          label="Country"
+          autoComplete="country-name"
+          value={values.country}
+          onChange={(event) => setField("country", event.target.value)}
+          onBlur={() => touch("country")}
+          error={errorFor("country")}
+        />
+        <TextField
+          label="Zip / postal code"
+          autoComplete="postal-code"
+          value={values.zipCode}
+          onChange={(event) => setField("zipCode", event.target.value)}
+          onBlur={() => touch("zipCode")}
+          error={errorFor("zipCode")}
+        />
+      </div>
+
       <label className="flex cursor-pointer items-center gap-3 text-[13px] font-[600]">
         <input
           type="checkbox"
@@ -154,8 +137,8 @@ export default function AddressForm({ initial = emptyAddress, onSubmit, onCancel
         <Button variant="quiet" size="sm" onClick={onCancel} className="max-[480px]:w-full">
           Cancel
         </Button>
-        <Button type="submit" size="sm" disabled={!isValid} className="max-[480px]:w-full">
-          Save address
+        <Button type="submit" size="sm" disabled={!isValid || isSubmitting} className="max-[480px]:w-full">
+          {isSubmitting ? "Saving…" : "Save address"}
         </Button>
       </div>
     </form>

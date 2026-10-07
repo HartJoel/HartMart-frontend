@@ -1,13 +1,21 @@
 export type Address = {
-  id: number;
-  /** Short name the shopper gives the address, such as "Home". */
-  label: string;
-  fullName: string;
-  phone: string;
-  line1: string;
+  id: string;
+  userId: string;
+  addressLine: string;
   city: string;
   state: string;
+  country: string;
+  zipCode: string;
   isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
 };
 
-export type AddressInput = Omit<Address, "id">;
+export type AddressInput = {
+  addressLine: string;
+  city: string;
+  state: string;
+  country: string;
+  zipCode: string;
+  isDefault: boolean;
+};
