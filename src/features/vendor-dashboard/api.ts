@@ -71,13 +71,31 @@ export function useCreateProduct() {
   });
 }
 
-/** Edit a product's listing details. Stock adjustments go through `useUpdateStock` instead. */
+/**
+ * Edit a product's listing details, optionally replacing its image. Stock adjustments go
+ * through `useUpdateStock` instead. Only switches to multipart when a new image is chosen —
+ * the plain JSON PATCH is otherwise unchanged.
+ */
 export function useUpdateProduct() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: VendorProductInput }) =>
-      apiRequest<VendorProduct>(`${PRODUCTS_PREFIX}/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
+    mutationFn: ({ id, payload, image }: { id: string; payload: VendorProductInput; image?: File }) => {
+      if (!image) {
+        return apiRequest<VendorProduct>(`${PRODUCTS_PREFIX}/${id}`, { method: "PATCH", body: JSON.stringify(payload) });
+      }
+
+      const form = new FormData();
+      form.set("name", payload.name);
+      form.set("description", payload.description);
+      form.set("categorySlug", payload.categorySlug);
+      form.set("basePrice", String(payload.basePrice));
+      if (payload.discountPrice !== undefined) form.set("discountPrice", String(payload.discountPrice));
+      form.set("totalStock", String(payload.totalStock));
+      form.set("reorderLevel", String(payload.reorderLevel));
+      form.set("images", image);
+      return apiRequest<VendorProduct>(`${PRODUCTS_PREFIX}/${id}`, { method: "PATCH", body: form });
+    },
     onSuccess: (product) => {
       queryClient.invalidateQueries({ queryKey: VENDOR_PRODUCTS_KEY });
       queryClient.setQueryData(productKey(product.id), product);

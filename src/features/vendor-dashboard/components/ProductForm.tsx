@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import Button from "@/components/Button";
 import Field from "@/components/Field";
 import TextField from "@/components/TextField";
@@ -22,7 +22,7 @@ type FormValues = {
 type ProductFormProps = {
   initial?: VendorProductInput;
   categories: Category[];
-  /** Existing image URLs, shown read-only — the edit endpoint doesn't accept a new upload. */
+  /** The product's current image, shown until a new one is picked to replace it. */
   existingImages?: string[];
   submitLabel: string;
   isSubmitting?: boolean;
@@ -101,19 +101,27 @@ export default function ProductForm({
   const [touched, setTouched] = useState<Partial<Record<ProductField, boolean>>>({});
   const [image, setImage] = useState<File | undefined>(undefined);
   const [imagePreview, setImagePreview] = useState<string | undefined>(undefined);
+  const objectUrl = useRef<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (objectUrl.current) URL.revokeObjectURL(objectUrl.current);
+    };
+  }, []);
 
   function pickImage(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
+    if (!file) return;
+    if (objectUrl.current) URL.revokeObjectURL(objectUrl.current);
+    const previewUrl = URL.createObjectURL(file);
+    objectUrl.current = previewUrl;
     setImage(file);
-    setImagePreview((current) => {
-      if (current) URL.revokeObjectURL(current);
-      return file ? URL.createObjectURL(file) : undefined;
-    });
+    setImagePreview(previewUrl);
   }
 
   const errors = validate(values);
   const isValid = Object.keys(errors).length === 0;
-  const isEditing = existingImages !== undefined;
+  const currentImage = existingImages?.[0];
 
   function setField(field: keyof FormValues, value: string) {
     setValues((current) => ({ ...current, [field]: value }));
@@ -157,29 +165,21 @@ export default function ProductForm({
   return (
     <form noValidate onSubmit={handleSubmit}>
       <div className="grid grid-cols-[0.8fr_1.2fr] gap-10 max-[900px]:grid-cols-1">
-        {isEditing ? (
-          <div className="flex min-h-[390px] flex-col items-center justify-center gap-3 rounded-hm-md border border-hm-border bg-hm-surface p-6">
-            {existingImages && existingImages.length > 0 ? (
-              <img src={existingImages[0]} alt="" className="max-h-[300px] rounded-hm-sm object-contain" />
-            ) : (
-              <span className="text-[11px] text-hm-muted">No image uploaded yet.</span>
-            )}
-            <span className="text-[10px] text-hm-muted">Image updates aren&apos;t supported from this form yet.</span>
-          </div>
-        ) : (
-          <label className="flex min-h-[390px] cursor-pointer flex-col items-center justify-center rounded-hm-md border border-dashed border-hm-border bg-hm-surface text-hm-muted">
-            {imagePreview ? (
-              <img src={imagePreview} alt="" className="max-h-[300px] rounded-hm-sm object-contain" />
-            ) : (
-              <>
-                <span aria-hidden="true">⇧</span>
-                <b className="mt-[15px] text-hm-text">Drop an image here</b>
-                <span className="mt-[7px] text-[9px]">or click to browse</span>
-              </>
-            )}
-            <input accept="image/*" type="file" className="hidden" onChange={pickImage} />
-          </label>
-        )}
+        <label className="flex min-h-[390px] cursor-pointer flex-col items-center justify-center gap-3 rounded-hm-md border border-dashed border-hm-border bg-hm-surface text-hm-muted">
+          {imagePreview || currentImage ? (
+            <>
+              <img src={imagePreview ?? currentImage} alt="" className="max-h-[300px] rounded-hm-sm object-contain" />
+              <span className="text-[10px]">Click to replace</span>
+            </>
+          ) : (
+            <>
+              <span aria-hidden="true">⇧</span>
+              <b className="mt-[15px] text-hm-text">Drop an image here</b>
+              <span className="mt-[7px] text-[9px]">or click to browse</span>
+            </>
+          )}
+          <input accept="image/*" type="file" className="hidden" onChange={pickImage} />
+        </label>
 
         <section className="flex flex-col gap-[18px] rounded-hm-md bg-hm-surface p-[30px]">
           <TextField

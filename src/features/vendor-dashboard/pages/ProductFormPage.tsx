@@ -22,7 +22,7 @@ export default function ProductFormPage() {
 
   function save(values: VendorProductInput, image?: File) {
     const mutation = isEditing
-      ? updateProduct.mutateAsync({ id, payload: values })
+      ? updateProduct.mutateAsync({ id, payload: values, image })
       : createProduct.mutateAsync({ ...values, image });
     mutation.then(backToProducts).catch(() => {});
   }
