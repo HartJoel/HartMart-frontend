@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { Link, NavLink } from "react-router";
+import { useState, type FormEvent } from "react";
+import { Link, NavLink, useNavigate } from "react-router";
 import Brand from "@/components/Brand";
 import { buttonClasses } from "@/components/Button";
 import Icon, { type IconName } from "@/components/Icon";
@@ -67,13 +68,33 @@ export default function Header() {
   const { savedIds } = useWishlist();
   const { itemCount } = useCart();
   const { roles } = useSession();
+  const navigate = useNavigate();
+  const [search, setSearch] = useState("");
+
+  function submitSearch(event: FormEvent) {
+    event.preventDefault();
+    const query = search.trim();
+    navigate(query ? `/products?search=${encodeURIComponent(query)}` : "/products");
+  }
 
   return (
     <header className="flex min-h-[82px] items-center gap-10 border-b border-hm-border bg-[rgba(250,250,250,0.9)] px-[clamp(20px,5vw,72px)] py-4 max-[600px]:gap-4">
       <Brand to="/" />
-      <div className="flex h-[46px] max-w-[560px] flex-1 items-center rounded-hm-sm bg-hm-field px-[18px] text-[12px] text-hm-muted max-[900px]:hidden">
-        Search products and vendors
-      </div>
+      <form
+        role="search"
+        onSubmit={submitSearch}
+        className="flex h-[46px] max-w-[560px] flex-1 items-center gap-2.5 rounded-hm-sm bg-hm-field px-[18px] text-[12px] max-[900px]:hidden"
+      >
+        <Icon name="search" size={15} className="shrink-0 text-hm-muted" />
+        <input
+          aria-label="Search products and vendors"
+          className="w-full border-0 bg-transparent text-hm-text outline-0 placeholder:text-hm-muted"
+          type="search"
+          placeholder="Search products and vendors"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+        />
+      </form>
       <nav aria-label="Primary" className="ml-auto flex items-center gap-2 max-[600px]:gap-1">
         {roles.includes("VENDOR") ? (
           <Link

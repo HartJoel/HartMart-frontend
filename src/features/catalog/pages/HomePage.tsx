@@ -1,15 +1,19 @@
 import { Link } from "react-router";
-import { buttonClasses } from "@/components/Button";
+import Button, { buttonClasses } from "@/components/Button";
 import RevealGroup from "@/components/RevealGroup";
 import { RevealItem } from "@/components/Reveal";
+import { toCardProduct, useProducts } from "@/features/catalog/api";
 import ProductCard from "@/features/catalog/components/ProductCard";
 import VendorSpotlight from "@/features/catalog/components/VendorSpotlight";
 import { productGridClass, sectionHeadClass } from "@/features/catalog/styles";
-import { products } from "@/lib/mock/products";
 
 const categories = ["Electronics", "Fashion & Apparel", "Home & Living", "Beauty", "Groceries", "Phones & Tablets"];
+const FEATURED_COUNT = 4;
 
 export default function HomePage() {
+  const { data, isPending, isError, refetch } = useProducts({ limit: FEATURED_COUNT });
+  const featured = data?.data ?? [];
+
   return (
     <>
       <section className="relative min-h-[620px] overflow-hidden rounded-hm-md text-white max-[600px]:min-h-[540px]">
@@ -66,13 +70,31 @@ export default function HomePage() {
             View all
           </Link>
         </div>
-        <RevealGroup className={productGridClass}>
-          {products.slice(0, 4).map((product) => (
-            <RevealItem key={product.id}>
-              <ProductCard product={product} />
-            </RevealItem>
-          ))}
-        </RevealGroup>
+        {isError ? (
+          <div className="grid place-items-center gap-4 rounded-hm-md border border-dashed border-hm-border px-6 py-16 text-center">
+            <p className="m-0 text-[13px] text-hm-muted">Couldn&apos;t load featured products.</p>
+            <Button variant="ghost" size="sm" onClick={() => refetch()}>
+              Retry
+            </Button>
+          </div>
+        ) : isPending ? (
+          <div className={productGridClass}>
+            {Array.from({ length: FEATURED_COUNT }).map((_, index) => (
+              <div key={index}>
+                <div className="aspect-[4/5] rounded-hm-md bg-hm-field" />
+                <span className="mx-1 my-3.5 block h-3 w-[60%] rounded-[8px] bg-hm-field" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <RevealGroup className={productGridClass}>
+            {featured.map((product) => (
+              <RevealItem key={product.id}>
+                <ProductCard product={toCardProduct(product)} />
+              </RevealItem>
+            ))}
+          </RevealGroup>
+        )}
       </section>
     </>
   );

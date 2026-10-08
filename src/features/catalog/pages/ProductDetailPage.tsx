@@ -2,26 +2,56 @@ import { useState } from "react";
 import { Link, useParams } from "react-router";
 import Button from "@/components/Button";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import Icon from "@/components/Icon";
 import QuantityStepper from "@/components/QuantityStepper";
 import Rating from "@/components/Rating";
+import { useProduct } from "@/features/catalog/api";
 import ProductReviews from "@/features/catalog/components/ProductReviews";
-import { useCart } from "@/features/cart/CartContext";
-import { useWishlist } from "@/features/wishlist/WishlistContext";
+import { useVendor } from "@/features/vendor-storefront/api";
 import type { VendorOriginState } from "@/features/vendor-storefront/vendorOrigin";
-import { formatNaira } from "@/lib/format";
-import { products } from "@/lib/mock/products";
-import { reviewSummary } from "@/lib/mock/reviews";
-import { findVendor } from "@/lib/mock/vendors";
+import { formatNaira, getInitials } from "@/lib/format";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
-  const product = products.find((item) => item.id === Number(id)) ?? products[0];
-  const vendor = findVendor(product.vendorId);
+  const { data: product, isPending, isError, refetch } = useProduct(id);
+  const { data: vendor } = useVendor(product?.vendorId);
   const [quantity, setQuantity] = useState(1);
-  const [stock, setStock] = useState(true);
-  const { isSaved, toggle } = useWishlist();
-  const { addItem } = useCart();
-  const saved = isSaved(product.id);
+
+  if (isPending) {
+    return (
+      <div className="grid grid-cols-[1.1fr_0.9fr] items-start gap-[7vw] pt-10 max-[900px]:grid-cols-1">
+        <div>
+          <div className="aspect-square w-full animate-pulse rounded-hm-md bg-hm-field" />
+          <div className="mt-3 grid grid-cols-4 gap-2.5">
+            {[0, 1, 2, 3].map((n) => (
+              <div key={n} className="aspect-square w-full animate-pulse rounded-[10px] bg-hm-field" />
+            ))}
+          </div>
+        </div>
+        <div className="flex flex-col gap-4">
+          <div className="h-3 w-24 animate-pulse rounded-full bg-hm-field" />
+          <div className="h-12 w-3/4 animate-pulse rounded-hm-sm bg-hm-field" />
+          <div className="h-6 w-1/3 animate-pulse rounded-hm-sm bg-hm-field" />
+          <div className="h-24 w-full animate-pulse rounded-hm-sm bg-hm-field" />
+        </div>
+      </div>
+    );
+  }
+
+  if (isError || !product) {
+    return (
+      <div className="grid min-h-[420px] place-items-center gap-4 text-center">
+        <p className="m-0 text-[13px] text-hm-muted">Couldn&apos;t load this product. Please try again.</p>
+        <Button variant="ghost" size="sm" onClick={() => refetch()}>
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  const inStock = product.availableStock > 0;
+  const images = product.images.length > 0 ? product.images : null;
+  const price = product.discountPrice ? Number(product.discountPrice) : Number(product.basePrice);
 
   return (
     <>
@@ -29,60 +59,64 @@ export default function ProductDetailPage() {
 
       <div className="grid grid-cols-[1.1fr_0.9fr] items-start gap-[7vw] pt-10 max-[900px]:grid-cols-1">
         <div>
-          <img className="block aspect-square w-full rounded-hm-md object-cover" src={product.image} alt={product.name} />
+          {images ? (
+            <img
+              className="block aspect-square w-full rounded-hm-md object-cover"
+              src={images[0].url}
+              alt={product.name}
+            />
+          ) : (
+            <span className="grid aspect-square w-full place-items-center rounded-hm-md bg-hm-field text-hm-muted">
+              <Icon name="shop" size={40} />
+            </span>
+          )}
           <div className="mt-3 grid grid-cols-4 gap-2.5">
-            {[0, 1, 2, 3].map((n) => (
-              <img className="aspect-square w-full rounded-[10px] object-cover" src={product.image} alt="" key={n} />
-            ))}
+            {[0, 1, 2, 3].map((n) =>
+              images && images[n] ? (
+                <img className="aspect-square w-full rounded-[10px] object-cover" src={images[n].url} alt="" key={n} />
+              ) : (
+                <span key={n} className="grid aspect-square w-full place-items-center rounded-[10px] bg-hm-field text-hm-muted">
+                  <Icon name="shop" size={16} />
+                </span>
+              ),
+            )}
           </div>
         </div>
 
         <section>
-          <div className="flex items-center justify-end gap-2.5 text-[9px] text-hm-muted">
-            <span>Preview</span>
-            <Button variant="ghost" onClick={() => setStock(!stock)}>
-              {stock ? "Out of stock" : "In stock"}
-            </Button>
-          </div>
           <small className="text-[10px] font-[750] tracking-[0.14em] text-hm-accent uppercase">
-            {product.vendor}
+            {vendor?.storeName ?? "HartMart"}
           </small>
           <h1 className="my-4 text-[clamp(42px,5vw,68px)] leading-none tracking-[-0.06em]">{product.name}</h1>
           <div className="flex items-center gap-2.5 text-[11px] text-hm-muted">
-            <Rating value={reviewSummary.average} size={12} />
+            <Rating value={product.averageRating} size={12} />
             <span>
-              {reviewSummary.average.toFixed(1)} · {reviewSummary.count} reviews
+              {product.averageRating.toFixed(1)} · {product.reviewCount} reviews
             </span>
           </div>
           <div className="mt-10 mb-6 flex items-center gap-4">
-            <b className="text-[30px] text-hm-accent">{formatNaira(product.price)}</b>
-            <del className="text-hm-muted">₦24,000</del>
+            <b className="text-[30px] text-hm-accent">{formatNaira(price)}</b>
+            {product.discountPrice && <del className="text-hm-muted">{formatNaira(Number(product.basePrice))}</del>}
           </div>
-          <p className="leading-[1.7] text-hm-muted">
-            Immersive sound, clear calls, and up to 28 hours of listening with adaptive noise cancellation.
-          </p>
+          <p className="leading-[1.7] text-hm-muted">{product.description}</p>
           <div className="mt-7 flex items-center gap-3">
-            {stock ? (
+            {inStock ? (
               <QuantityStepper
                 value={quantity}
-                onDecrease={() => setQuantity(Math.max(1, quantity - 1))}
-                onIncrease={() => setQuantity(quantity + 1)}
+                onDecrease={() => setQuantity((current) => Math.max(1, current - 1))}
+                onIncrease={() => setQuantity((current) => Math.min(product.availableStock, current + 1))}
               />
             ) : (
               <span>Out of stock</span>
             )}
-            <Button disabled={!stock} onClick={() => addItem(product, quantity)}>
+            <Button disabled title="Cart isn't connected yet">
               Add to Cart
             </Button>
-            <Button
-              variant="ghost"
-              aria-pressed={saved}
-              aria-label={saved ? "Remove from wishlist" : "Save to wishlist"}
-              onClick={() => toggle(product.id)}
-            >
-              {saved ? "♥" : "♡"}
+            <Button variant="ghost" disabled aria-label="Save to wishlist" title="Wishlist isn't connected yet">
+              ♡
             </Button>
           </div>
+          <p className="mt-2 text-[10px] text-hm-muted">Cart and wishlist aren&apos;t connected yet.</p>
 
           {vendor && (
             <article className="mt-12 flex items-center gap-3.5 rounded-hm-md bg-hm-surface p-6">
@@ -90,11 +124,11 @@ export default function ProductDetailPage() {
                 aria-hidden="true"
                 className="grid size-[46px] shrink-0 place-items-center rounded-full bg-hm-text text-[11px] text-white"
               >
-                {vendor.initials}
+                {getInitials(vendor.storeName)}
               </span>
               <div className="min-w-0">
-                <strong>{vendor.name}</strong>
-                <small className="mt-1 block text-hm-muted">{vendor.tagline}</small>
+                <strong>{vendor.storeName}</strong>
+                <small className="mt-1 block truncate text-hm-muted">{vendor.storeDescription}</small>
               </div>
               <Link
                 className="ml-auto shrink-0 text-[11px] text-hm-accent no-underline"

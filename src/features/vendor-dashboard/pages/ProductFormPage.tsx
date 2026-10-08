@@ -1,66 +1,92 @@
 import { useNavigate, useParams } from "react-router";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Button from "@/components/Button";
-import Field from "@/components/Field";
-import Input from "@/components/Input";
 import PageHeader from "@/components/PageHeader";
-
-const priceFields = ["Base price", "Discount price", "Stock", "Reorder level"];
+import ProductForm from "@/features/vendor-dashboard/components/ProductForm";
+import { useCategories, useCreateProduct, useProduct, useUpdateProduct } from "@/features/vendor-dashboard/api";
+import type { VendorProductInput } from "@/types/product";
 
 export default function ProductFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const isEditing = id !== undefined;
+
+  const { data: categories, isPending: categoriesPending, isError: categoriesError, refetch: refetchCategories } =
+    useCategories();
+  const { data: product, isPending: productPending, isError: productError, refetch: refetchProduct } = useProduct(id);
+  const createProduct = useCreateProduct();
+  const updateProduct = useUpdateProduct();
+
   const backToProducts = () => navigate("/vendor/products");
+  const isSaving = createProduct.isPending || updateProduct.isPending;
+
+  function save(values: VendorProductInput, image?: File) {
+    const mutation = isEditing
+      ? updateProduct.mutateAsync({ id, payload: values })
+      : createProduct.mutateAsync({ ...values, image });
+    mutation.then(backToProducts).catch(() => {});
+  }
+
+  const isLoading = categoriesPending || (isEditing && productPending);
+  const isError = categoriesError || (isEditing && productError);
 
   return (
     <>
-      <Breadcrumbs items={[{ label: "Dashboard", to: "/vendor/dashboard" }, { label: "Products", to: "/vendor/products" }, { label: id ? "Edit product" : "New product" }]} />
+      <Breadcrumbs
+        items={[
+          { label: "Dashboard", to: "/vendor/dashboard" },
+          { label: "Products", to: "/vendor/products" },
+          { label: isEditing ? "Edit product" : "New product" },
+        ]}
+      />
       <PageHeader
-        eyebrow="NEW PRODUCT"
-        title="Add a product"
+        eyebrow={isEditing ? "EDIT PRODUCT" : "NEW PRODUCT"}
+        title={isEditing ? "Edit product" : "Add a product"}
         description="Give customers clear details, accurate pricing and useful imagery."
       />
 
-      <div className="grid grid-cols-[0.8fr_1.2fr] gap-10 max-[900px]:grid-cols-1">
-        <label className="flex min-h-[390px] flex-col items-center justify-center rounded-hm-md border border-dashed border-[#ccc] bg-hm-surface text-hm-muted">
-          ⇧<b className="mt-[15px] text-hm-text">Drop an image here</b>
-          <span className="mt-[7px] text-[9px]">or click to browse</span>
-          <input accept="image/*" type="file" className="hidden" />
-        </label>
-
-        <section className="flex flex-col gap-[18px] rounded-hm-md bg-hm-surface p-[30px]">
-          <Field label="Product name" className="gap-2 text-[9px] font-[650]">
-            <Input className="min-h-12 rounded-[11px] p-3" placeholder="Wireless Earbuds Pro" />
-          </Field>
-          <Field label="Description" className="gap-2 text-[9px] font-[650]">
-            <textarea
-              className="min-h-[110px] w-full rounded-[11px] border-0 bg-hm-field p-3"
-              placeholder="Describe the product"
-            />
-          </Field>
-          <Field label="Category" className="gap-2 text-[9px] font-[650]">
-            <select className="min-h-12 rounded-[11px] border-0 bg-hm-field p-3">
-              <option>Electronics</option>
-              <option>Phones &amp; Tablets</option>
-            </select>
-          </Field>
-          <div className="grid grid-cols-2 gap-[18px]">
-            {priceFields.map((label) => (
-              <Field key={label} label={label} className="gap-2 text-[9px] font-[650]">
-                <Input type="number" className="min-h-12 rounded-[11px] p-3" />
-              </Field>
-            ))}
-          </div>
-          <footer className="flex justify-end gap-2.5">
-            <Button variant="ghost" size="sm" onClick={backToProducts}>
-              Cancel
-            </Button>
-            <Button size="sm" onClick={backToProducts}>
-              Add Product
-            </Button>
-          </footer>
-        </section>
-      </div>
+      {isLoading ? (
+        <div className="grid grid-cols-[0.8fr_1.2fr] gap-10 max-[900px]:grid-cols-1">
+          <div className="min-h-[390px] animate-pulse rounded-hm-md bg-hm-field" />
+          <div className="min-h-[390px] animate-pulse rounded-hm-md bg-hm-field" />
+        </div>
+      ) : isError ? (
+        <div className="grid place-items-center gap-4 rounded-hm-md bg-hm-surface px-6 py-16 text-center">
+          <p className="m-0 text-[13px] text-hm-muted">Couldn&apos;t load this form. Please try again.</p>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              refetchCategories();
+              if (isEditing) refetchProduct();
+            }}
+          >
+            Retry
+          </Button>
+        </div>
+      ) : (
+        <ProductForm
+          categories={categories ?? []}
+          existingImages={isEditing ? product?.images.map((image) => image.url) : undefined}
+          initial={
+            product
+              ? {
+                  name: product.name,
+                  description: product.description,
+                  categorySlug: categories?.find((category) => category.id === product.categoryId)?.slug ?? "",
+                  basePrice: Number(product.basePrice),
+                  discountPrice: product.discountPrice ? Number(product.discountPrice) : undefined,
+                  totalStock: product.totalStock,
+                  reorderLevel: product.reorderLevel,
+                }
+              : undefined
+          }
+          submitLabel={isEditing ? "Save changes" : "Add Product"}
+          isSubmitting={isSaving}
+          onSubmit={save}
+          onCancel={backToProducts}
+        />
+      )}
     </>
   );
 }
