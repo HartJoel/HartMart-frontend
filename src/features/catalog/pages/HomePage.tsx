@@ -2,17 +2,18 @@ import { Link } from "react-router";
 import Button, { buttonClasses } from "@/components/Button";
 import RevealGroup from "@/components/RevealGroup";
 import { RevealItem } from "@/components/Reveal";
-import { toCardProduct, useProducts } from "@/features/catalog/api";
+import { toCardProduct, useCategories, useProducts } from "@/features/catalog/api";
 import ProductCard from "@/features/catalog/components/ProductCard";
 import VendorSpotlight from "@/features/catalog/components/VendorSpotlight";
 import { productGridClass, sectionHeadClass } from "@/features/catalog/styles";
 
-const categories = ["Electronics", "Fashion & Apparel", "Home & Living", "Beauty", "Groceries", "Phones & Tablets"];
 const FEATURED_COUNT = 4;
 
 export default function HomePage() {
   const { data, isPending, isError, refetch } = useProducts({ limit: FEATURED_COUNT });
   const featured = data?.data ?? [];
+  const { data: allCategories, isPending: categoriesPending } = useCategories();
+  const categories = (allCategories ?? []).filter((category) => category.parentId === null);
 
   return (
     <>
@@ -39,24 +40,39 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="pt-[100px]">
-        <div className={sectionHeadClass}>
-          <h2 className="m-0 text-[32px] tracking-[-0.045em]">Shop by category</h2>
-        </div>
-        <RevealGroup className="flex gap-7 overflow-auto">
-          {categories.map((category) => (
-            <RevealItem key={category} className="shrink-0">
-              <Link
-                to={`/products?category=${encodeURIComponent(category)}`}
-                className="flex min-w-max items-center gap-2.5 text-[12px] font-[650] text-hm-text no-underline transition-colors duration-200 hover:text-hm-accent"
-              >
-                <span className="grid size-11 place-items-center rounded-full bg-hm-field">{category.slice(0, 1)}</span>
-                {category}
-              </Link>
-            </RevealItem>
-          ))}
-        </RevealGroup>
-      </section>
+      {(categoriesPending || categories.length > 0) && (
+        <section className="pt-[100px]">
+          <div className={sectionHeadClass}>
+            <h2 className="m-0 text-[32px] tracking-[-0.045em]">Shop by category</h2>
+          </div>
+          <RevealGroup className="flex gap-7 overflow-auto">
+            {categoriesPending
+              ? Array.from({ length: 6 }).map((_, index) => (
+                  <div key={index} className="flex min-w-max shrink-0 items-center gap-2.5">
+                    <span className="size-11 animate-pulse rounded-full bg-hm-field" />
+                    <span className="h-3 w-16 animate-pulse rounded-[8px] bg-hm-field" />
+                  </div>
+                ))
+              : categories.map((category) => (
+                  <RevealItem key={category.id} className="shrink-0">
+                    <Link
+                      to={`/products?categoryId=${encodeURIComponent(category.id)}`}
+                      className="flex min-w-max items-center gap-2.5 text-[12px] font-[650] text-hm-text no-underline transition-colors duration-200 hover:text-hm-accent"
+                    >
+                      <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-full bg-hm-field">
+                        {category.icon ? (
+                          <img src={category.icon} alt="" className="size-full object-cover" />
+                        ) : (
+                          category.name.slice(0, 1)
+                        )}
+                      </span>
+                      {category.name}
+                    </Link>
+                  </RevealItem>
+                ))}
+          </RevealGroup>
+        </section>
+      )}
 
       <VendorSpotlight />
 

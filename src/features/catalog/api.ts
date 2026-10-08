@@ -1,13 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest, type PaginationMeta } from "@/lib/api/client";
+import type { Category } from "@/types/category";
 import type { CatalogProduct, VendorProduct } from "@/types/product";
 
 const PRODUCTS_PREFIX = "/api/v1/products";
+const CATEGORY_PREFIX = "/api/v1/category";
 
 export type ProductsParams = {
   page?: number;
   limit?: number;
   search?: string;
+  /** Not in the documented query params, but confirmed working against the live API. */
+  categoryId?: string;
 };
 
 /**
@@ -19,6 +23,7 @@ export function useProducts(params: ProductsParams = {}) {
   if (params.page !== undefined) query.set("page", String(params.page));
   if (params.limit !== undefined) query.set("limit", String(params.limit));
   if (params.search) query.set("search", params.search);
+  if (params.categoryId) query.set("categoryId", params.categoryId);
   const search = query.toString();
 
   return useQuery({
@@ -27,6 +32,14 @@ export function useProducts(params: ProductsParams = {}) {
       apiRequest<{ data: CatalogProduct[]; pagination: PaginationMeta }>(
         `${PRODUCTS_PREFIX}${search ? `?${search}` : ""}`,
       ),
+  });
+}
+
+/** Flat category list for the home page rail and the product browser's sidebar. */
+export function useCategories() {
+  return useQuery({
+    queryKey: ["categories"],
+    queryFn: () => apiRequest<Category[]>(CATEGORY_PREFIX),
   });
 }
 

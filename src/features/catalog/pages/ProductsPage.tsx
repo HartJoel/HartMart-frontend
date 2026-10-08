@@ -9,20 +9,21 @@ import { RevealItem } from "@/components/Reveal";
 import { cn } from "@/lib/cn";
 import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import { useMotionPresets } from "@/lib/motion";
-import { toCardProduct, useProducts } from "@/features/catalog/api";
+import { toCardProduct, useCategories, useProducts } from "@/features/catalog/api";
 import ProductCard from "@/features/catalog/components/ProductCard";
 import { productGridClass } from "@/features/catalog/styles";
 
-const categories = ["All products", "Electronics", "Phones & Tablets", "Fashion", "Home & Living", "Beauty"];
 const PAGE_SIZE = 12;
 
 export default function ProductsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlSearch = searchParams.get("search") ?? "";
+  const categoryId = searchParams.get("categoryId");
   const [query, setQuery] = useState(urlSearch);
   const [page, setPage] = useState(1);
   const debouncedQuery = useDebouncedValue(query, 400);
   const { rise } = useMotionPresets();
+  const { data: categories } = useCategories();
 
   // Keeps the box in sync when the header search bar submits a new term while already on this page.
   useEffect(() => setQuery(urlSearch), [urlSearch]);
@@ -40,8 +41,25 @@ export default function ProductsPage() {
     );
   }, [debouncedQuery]);
 
-  const { data, isPending, isError, refetch } = useProducts({ page, limit: PAGE_SIZE, search: debouncedQuery || undefined });
+  function selectCategory(id: string | null) {
+    setPage(1);
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      if (id) next.set("categoryId", id);
+      else next.delete("categoryId");
+      return next;
+    });
+  }
+
+  const { data, isPending, isError, refetch } = useProducts({
+    page,
+    limit: PAGE_SIZE,
+    search: debouncedQuery || undefined,
+    categoryId: categoryId || undefined,
+  });
   const products = data?.data ?? [];
+  const roots = (categories ?? []).filter((category) => category.parentId === null);
+  const activeCategoryName = (categories ?? []).find((category) => category.id === categoryId)?.name;
 
   return (
     <>
@@ -51,7 +69,11 @@ export default function ProductsPage() {
         eyebrow="CATALOG"
         title="Find exactly what you need."
         description={
-          isPending ? "Searching…" : `${data?.pagination.total ?? 0} results${query ? ` for “${query}”` : ""}`
+          isPending
+            ? "Searching…"
+            : `${data?.pagination.total ?? 0} results${query ? ` for “${query}”` : ""}${
+                activeCategoryName ? ` in ${activeCategoryName}` : ""
+              }`
         }
       />
 
@@ -67,18 +89,46 @@ export default function ProductsPage() {
 
       <div className="grid grid-cols-[190px_1fr] gap-[50px] max-[900px]:grid-cols-1">
         <aside className="flex flex-col gap-1 max-[900px]:flex-row max-[900px]:overflow-auto">
-          {categories.map((category, index) => (
-            <button
-              type="button"
-              key={category}
-              className={cn(
-                "rounded-[10px] bg-transparent p-3 text-left text-hm-muted max-[900px]:min-w-max",
-                index === 0 && "bg-hm-text text-white",
-              )}
-            >
-              {category}
-            </button>
-          ))}
+          <button
+            type="button"
+            onClick={() => selectCategory(null)}
+            className={cn(
+              "rounded-[10px] bg-transparent p-3 text-left text-hm-muted max-[900px]:min-w-max",
+              !categoryId && "bg-hm-text text-white",
+            )}
+          >
+            All products
+          </button>
+          {roots.map((category) => {
+            const subcategories = (categories ?? []).filter((sub) => sub.parentId === category.id);
+            return (
+              <div key={category.id} className="flex flex-col gap-1 max-[900px]:flex-row">
+                <button
+                  type="button"
+                  onClick={() => selectCategory(category.id)}
+                  className={cn(
+                    "rounded-[10px] bg-transparent p-3 text-left text-hm-muted max-[900px]:min-w-max",
+                    categoryId === category.id && "bg-hm-text text-white",
+                  )}
+                >
+                  {category.name}
+                </button>
+                {subcategories.map((sub) => (
+                  <button
+                    type="button"
+                    key={sub.id}
+                    onClick={() => selectCategory(sub.id)}
+                    className={cn(
+                      "rounded-[10px] bg-transparent p-3 pl-7 text-left text-[12px] text-hm-muted max-[900px]:min-w-max max-[900px]:pl-3",
+                      categoryId === sub.id && "bg-hm-text text-white",
+                    )}
+                  >
+                    {sub.name}
+                  </button>
+                ))}
+              </div>
+            );
+          })}
         </aside>
 
         <section>
@@ -118,10 +168,16 @@ export default function ProductsPage() {
                   </RevealGroup>
                 ) : (
                   <div className="flex min-h-[420px] flex-col items-center justify-center text-center">
-                    <h2 className="m-0">No products match this search.</h2>
-                    <p>Try a broader term or clear your current search.</p>
-                    <Button variant="ghost" onClick={() => setQuery("")}>
-                      Clear search
+                    <h2 className="m-0">No products match{activeCategoryName ? ` ${activeCategoryName}` : " this search"}.</h2>
+                    <p>Try a broader term or clear your current filters.</p>
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setQuery("");
+                        selectCategory(null);
+                      }}
+                    >
+                      Clear filters
                     </Button>
                   </div>
                 )}
