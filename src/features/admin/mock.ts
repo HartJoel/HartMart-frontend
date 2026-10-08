@@ -16,21 +16,6 @@ export const initialApplications: VendorApplication[] = [
   { id: 3, store: "Scent House Lagos", owner: "Dara Phillips", date: "17 Jun 2025", category: "Beauty", rc: "RC 9401288", location: "Ikoyi, Lagos" },
 ];
 
-/** A top-level category has no parent. Subcategories point at one top-level category. */
-export type Category = { id: number; name: string; parentId: number | null; products: number };
-
-export const initialCategories: Category[] = [
-  { id: 1, name: "Electronics", parentId: null, products: 2840 },
-  { id: 2, name: "Audio", parentId: 1, products: 640 },
-  { id: 3, name: "Computers", parentId: 1, products: 812 },
-  { id: 4, name: "Fashion & Apparel", parentId: null, products: 4128 },
-  { id: 5, name: "Women’s Fashion", parentId: 4, products: 1840 },
-  { id: 6, name: "Men’s Fashion", parentId: 4, products: 1612 },
-  { id: 7, name: "Home & Living", parentId: null, products: 1950 },
-  { id: 8, name: "Kitchenware", parentId: 7, products: 720 },
-  { id: 9, name: "Beauty", parentId: null, products: 1104 },
-];
-
 export const auditLogs = [
   { timestamp: "20 Jun 2025 · 14:32:08", actor: "kemi@hartmart.ng", action: "VENDOR_VERIFIED", resource: "Vendor · AjoTech Gadgets" },
   { timestamp: "20 Jun 2025 · 14:18:42", actor: "system", action: "PAYMENT_CONFIRMED", resource: "Order · HM-2148" },

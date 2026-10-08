@@ -7,34 +7,44 @@ import IconButton from "@/components/IconButton";
 import Modal from "@/components/Modal";
 import PageHeader from "@/components/PageHeader";
 import CategoryForm, { type CategoryValues } from "@/features/admin/components/CategoryForm";
-import { initialCategories, type Category } from "@/features/admin/mock";
+import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from "@/features/admin/api";
+import type { Category } from "@/types/category";
 
 type Dialog =
-  | { mode: "create"; parentId: number | null }
-  | { mode: "rename"; category: Category }
+  | { mode: "create"; parentId: string | null }
+  | { mode: "edit"; category: Category }
+  | { mode: "delete"; category: Category }
   | null;
 
 export default function CategoriesPage() {
-  const [categories, setCategories] = useState<Category[]>(initialCategories);
+  const { data: categories, isPending, isError, refetch } = useCategories();
+  const createCategory = useCreateCategory();
+  const updateCategory = useUpdateCategory();
+  const deleteCategory = useDeleteCategory();
   const [dialog, setDialog] = useState<Dialog>(null);
 
   const close = () => setDialog(null);
-  const roots = categories.filter((category) => category.parentId === null);
-  const subcategoriesOf = (parentId: number) => categories.filter((category) => category.parentId === parentId);
-  const subcategoryTotal = categories.length - roots.length;
-  const productTotal = roots.reduce((sum, category) => sum + category.products, 0);
+  const roots = (categories ?? []).filter((category) => category.parentId === null);
+  const subcategoriesOf = (parentId: string) =>
+    (categories ?? []).filter((category) => category.parentId === parentId);
+  const subcategoryTotal = (categories?.length ?? 0) - roots.length;
 
-  function createCategory({ name, parentId }: CategoryValues) {
-    setCategories((current) => [
-      ...current,
-      { id: Math.max(0, ...current.map((category) => category.id)) + 1, name, parentId, products: 0 },
-    ]);
-    close();
+  function submitCreate({ name, description, parentId, icon }: CategoryValues) {
+    createCategory.mutate(
+      { name, description: description.trim() || undefined, parentId, icon: icon ?? undefined },
+      { onSuccess: close },
+    );
   }
 
-  function renameCategory(id: number, name: string) {
-    setCategories((current) => current.map((category) => (category.id === id ? { ...category, name } : category)));
-    close();
+  function submitEdit(id: string, { name, description, icon }: CategoryValues) {
+    updateCategory.mutate(
+      { id, name, description: description.trim() || undefined, icon: icon ?? undefined },
+      { onSuccess: close },
+    );
+  }
+
+  function confirmDelete(category: Category) {
+    deleteCategory.mutate(category.id, { onSuccess: close });
   }
 
   return (
@@ -52,74 +62,94 @@ export default function CategoriesPage() {
         }
       />
 
-      <dl className="m-0 mb-8 grid grid-cols-3 gap-4 max-[640px]:grid-cols-1">
-        <Stat label="Categories" value={roots.length} />
-        <Stat label="Subcategories" value={subcategoryTotal} />
-        <Stat label="Products listed" value={productTotal} />
-      </dl>
+      {isError ? (
+        <div className="grid place-items-center gap-4 rounded-hm-md bg-hm-surface px-6 py-16 text-center">
+          <p className="m-0 text-[13px] text-hm-muted">Couldn&apos;t load categories. Please try again.</p>
+          <Button variant="ghost" size="sm" onClick={() => refetch()}>
+            Retry
+          </Button>
+        </div>
+      ) : isPending ? (
+        <div className="grid grid-cols-3 gap-5 max-[1100px]:grid-cols-2 max-[700px]:grid-cols-1">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="h-[260px] animate-pulse rounded-hm-md bg-hm-surface" />
+          ))}
+        </div>
+      ) : roots.length === 0 ? (
+        <div className="grid place-items-center gap-4 rounded-hm-md bg-hm-surface px-6 py-16 text-center">
+          <p className="m-0 text-[13px] text-hm-muted">No categories yet.</p>
+          <Button size="sm" onClick={() => setDialog({ mode: "create", parentId: null })}>
+            Add the first category
+          </Button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-5 max-[1100px]:grid-cols-2 max-[700px]:grid-cols-1">
+          {roots.map((category) => {
+            const subcategories = subcategoriesOf(category.id);
 
-      <div className="grid grid-cols-3 gap-5 max-[1100px]:grid-cols-2 max-[700px]:grid-cols-1">
-        {roots.map((category) => {
-          const subcategories = subcategoriesOf(category.id);
-
-          return (
-            <article key={category.id} className="flex min-h-[260px] flex-col rounded-hm-md bg-hm-surface p-6">
-              <div className="flex items-start gap-4">
-                <span
-                  aria-hidden="true"
-                  className="grid size-11 shrink-0 place-items-center rounded-full bg-hm-field text-[14px] font-bold"
-                >
-                  {category.name.charAt(0)}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <h2 className="m-0 truncate text-[17px] font-[650] tracking-[-0.02em]">{category.name}</h2>
-                  <p className="m-0 mt-1 text-[11px] text-hm-muted">
-                    {subcategories.length} {subcategories.length === 1 ? "subcategory" : "subcategories"} ·{" "}
-                    {category.products.toLocaleString("en-NG")} products
-                  </p>
+            return (
+              <article key={category.id} className="flex min-h-[260px] flex-col rounded-hm-md bg-hm-surface p-6">
+                <div className="flex items-start gap-4">
+                  <span
+                    aria-hidden="true"
+                    className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-full bg-hm-field text-[14px] font-bold"
+                  >
+                    {category.icon ? (
+                      <img src={category.icon} alt="" className="size-full object-cover" />
+                    ) : (
+                      category.name.charAt(0)
+                    )}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="m-0 truncate text-[17px] font-[650] tracking-[-0.02em]">{category.name}</h2>
+                    <p className="m-0 mt-1 text-[11px] text-hm-muted">
+                      {subcategories.length} {subcategories.length === 1 ? "subcategory" : "subcategories"}
+                    </p>
+                  </div>
+                  <EditButton name={category.name} onClick={() => setDialog({ mode: "edit", category })} />
+                  <DeleteButton name={category.name} onClick={() => setDialog({ mode: "delete", category })} />
                 </div>
-                <RenameButton name={category.name} onClick={() => setDialog({ mode: "rename", category })} />
-              </div>
 
-              <ul className="m-0 mt-6 flex-1 list-none p-0">
-                {subcategories.length === 0 ? (
-                  <li className="border-t border-hm-border py-4 text-[12px] text-hm-muted">No subcategories yet.</li>
-                ) : (
-                  subcategories.map((sub) => (
-                    <li key={sub.id} className="flex items-center gap-3 border-t border-hm-border py-3">
-                      <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-hm-border" />
-                      <span className="min-w-0 flex-1 truncate text-[13px]">{sub.name}</span>
-                      <span className="text-[11px] text-hm-muted">{sub.products.toLocaleString("en-NG")}</span>
-                      <RenameButton name={sub.name} onClick={() => setDialog({ mode: "rename", category: sub })} />
-                    </li>
-                  ))
-                )}
-              </ul>
+                <ul className="m-0 mt-6 flex-1 list-none p-0">
+                  {subcategories.length === 0 ? (
+                    <li className="border-t border-hm-border py-4 text-[12px] text-hm-muted">No subcategories yet.</li>
+                  ) : (
+                    subcategories.map((sub) => (
+                      <li key={sub.id} className="flex items-center gap-3 border-t border-hm-border py-3">
+                        <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-hm-border" />
+                        <span className="min-w-0 flex-1 truncate text-[13px]">{sub.name}</span>
+                        <EditButton name={sub.name} onClick={() => setDialog({ mode: "edit", category: sub })} />
+                        <DeleteButton name={sub.name} onClick={() => setDialog({ mode: "delete", category: sub })} />
+                      </li>
+                    ))
+                  )}
+                </ul>
 
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setDialog({ mode: "create", parentId: category.id })}
-                className="mt-4 self-start"
-              >
-                <Icon name="plus" size={13} />
-                Add subcategory
-              </Button>
-            </article>
-          );
-        })}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setDialog({ mode: "create", parentId: category.id })}
+                  className="mt-4 self-start"
+                >
+                  <Icon name="plus" size={13} />
+                  Add subcategory
+                </Button>
+              </article>
+            );
+          })}
 
-        <button
-          type="button"
-          onClick={() => setDialog({ mode: "create", parentId: null })}
-          className="flex min-h-[260px] cursor-pointer flex-col items-center justify-center gap-3 rounded-hm-md border border-dashed border-hm-border bg-transparent text-[13px] font-[600] text-hm-muted transition-colors duration-200 hover:border-hm-text hover:text-hm-text"
-        >
-          <span className="grid size-11 place-items-center rounded-full bg-hm-field">
-            <Icon name="plus" size={16} />
-          </span>
-          New top-level category
-        </button>
-      </div>
+          <button
+            type="button"
+            onClick={() => setDialog({ mode: "create", parentId: null })}
+            className="flex min-h-[260px] cursor-pointer flex-col items-center justify-center gap-3 rounded-hm-md border border-dashed border-hm-border bg-transparent text-[13px] font-[600] text-hm-muted transition-colors duration-200 hover:border-hm-text hover:text-hm-text"
+          >
+            <span className="grid size-11 place-items-center rounded-full bg-hm-field">
+              <Icon name="plus" size={16} />
+            </span>
+            New top-level category
+          </button>
+        </div>
+      )}
 
       <AnimatePresence>
         {dialog?.mode === "create" && (
@@ -131,26 +161,55 @@ export default function CategoriesPage() {
           >
             <CategoryForm
               mode="create"
-              initial={{ name: "", parentId: dialog.parentId }}
-              categories={categories}
-              submitLabel={dialog.parentId === null ? "Add category" : "Add subcategory"}
-              onSubmit={createCategory}
+              initial={{ name: "", description: "", parentId: dialog.parentId, icon: null, iconUrl: null }}
+              categories={categories ?? []}
+              submitLabel={createCategory.isPending ? "Adding…" : dialog.parentId === null ? "Add category" : "Add subcategory"}
+              onSubmit={submitCreate}
               onCancel={close}
             />
           </Modal>
         )}
 
-        {dialog?.mode === "rename" && (
-          <Modal key="rename" title="Rename category" eyebrow="CATALOG STRUCTURE" onClose={close}>
+        {dialog?.mode === "edit" && (
+          <Modal key="edit" title="Edit category" eyebrow="CATALOG STRUCTURE" onClose={close}>
             <CategoryForm
-              mode="rename"
-              initial={{ name: dialog.category.name, parentId: dialog.category.parentId }}
-              categories={categories}
+              mode="edit"
+              initial={{
+                name: dialog.category.name,
+                description: dialog.category.description ?? "",
+                parentId: dialog.category.parentId,
+                icon: null,
+                iconUrl: dialog.category.icon,
+              }}
+              categories={categories ?? []}
               editingId={dialog.category.id}
-              submitLabel="Save name"
-              onSubmit={({ name }) => renameCategory(dialog.category.id, name)}
+              submitLabel={updateCategory.isPending ? "Saving…" : "Save changes"}
+              onSubmit={(values) => submitEdit(dialog.category.id, values)}
               onCancel={close}
             />
+          </Modal>
+        )}
+
+        {dialog?.mode === "delete" && (
+          <Modal key="delete" title="Delete this category?" eyebrow="CATALOG STRUCTURE" onClose={close} className="max-w-[440px]">
+            <p className="m-0 text-[13px] leading-[1.7] text-hm-muted">
+              <span className="font-[650] text-hm-text">{dialog.category.name}</span> will be removed. This
+              can&apos;t be undone.
+            </p>
+            <div className="mt-8 flex justify-end gap-3 max-[480px]:flex-col-reverse">
+              <Button variant="quiet" size="sm" onClick={close} className="max-[480px]:w-full">
+                Cancel
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={deleteCategory.isPending}
+                onClick={() => confirmDelete(dialog.category)}
+                className="text-hm-error hover:bg-hm-error-soft max-[480px]:w-full"
+              >
+                {deleteCategory.isPending ? "Deleting…" : "Delete category"}
+              </Button>
+            </div>
           </Modal>
         )}
       </AnimatePresence>
@@ -158,19 +217,18 @@ export default function CategoriesPage() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function EditButton({ name, onClick }: { name: string; onClick: () => void }) {
   return (
-    <div className="rounded-hm-md bg-hm-surface p-6">
-      <dt className="text-[10px] font-[650] text-hm-muted">{label}</dt>
-      <dd className="m-0 mt-3 text-[30px] font-[650] tracking-[-0.04em]">{value.toLocaleString("en-NG")}</dd>
-    </div>
+    <IconButton label={`Edit ${name}`} title={`Edit ${name}`} onClick={onClick}>
+      <Icon name="edit" size={14} />
+    </IconButton>
   );
 }
 
-function RenameButton({ name, onClick }: { name: string; onClick: () => void }) {
+function DeleteButton({ name, onClick }: { name: string; onClick: () => void }) {
   return (
-    <IconButton label={`Rename ${name}`} title={`Rename ${name}`} onClick={onClick}>
-      <Icon name="edit" size={14} />
+    <IconButton label={`Delete ${name}`} title={`Delete ${name}`} tone="danger" onClick={onClick}>
+      <Icon name="trash" size={14} />
     </IconButton>
   );
 }
