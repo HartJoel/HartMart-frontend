@@ -2,6 +2,8 @@ import { useEffect, useState, type ChangeEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSearchParams } from "react-router";
 import Button from "@/components/Button";
+import Icon from "@/components/Icon";
+import IconButton from "@/components/IconButton";
 import PageHeader from "@/components/PageHeader";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import RevealGroup from "@/components/RevealGroup";
@@ -14,6 +16,23 @@ import ProductCard from "@/features/catalog/components/ProductCard";
 import { productGridClass } from "@/features/catalog/styles";
 
 const PAGE_SIZE = 12;
+
+/** Windowed page numbers around the current page, with "…" standing in for a gap. */
+function pageNumbers(current: number, total: number): (number | "…")[] {
+  if (total <= 7) return Array.from({ length: total }, (_, index) => index + 1);
+
+  const kept = new Set([1, total, current - 1, current, current + 1]);
+  const sorted = [...kept].filter((item) => item >= 1 && item <= total).sort((a, b) => a - b);
+
+  const result: (number | "…")[] = [];
+  let previous = 0;
+  for (const item of sorted) {
+    if (previous && item - previous > 1) result.push("…");
+    result.push(item);
+    previous = item;
+  }
+  return result;
+}
 
 export default function ProductsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -77,54 +96,47 @@ export default function ProductsPage() {
         }
       />
 
-      <div className="mb-[46px] flex h-[58px] max-w-[800px] items-center rounded-[14px] bg-hm-surface px-[18px]">
+      <div className="mb-[46px] flex h-[58px] max-w-[800px] items-center gap-3 rounded-[14px] bg-hm-surface px-[18px]">
+        <Icon name="search" size={18} className="shrink-0 text-hm-muted" />
         <input
           aria-label="Search products"
           className="min-w-0 flex-1 border-0 bg-transparent text-[16px] outline-0"
           type="search"
+          placeholder="Search products…"
           value={query}
           onChange={(event: ChangeEvent<HTMLInputElement>) => setQuery(event.target.value)}
         />
+        {query && (
+          <IconButton label="Clear search" onClick={() => setQuery("")}>
+            <Icon name="close" size={13} />
+          </IconButton>
+        )}
       </div>
 
-      <div className="grid grid-cols-[190px_1fr] gap-[50px] max-[900px]:grid-cols-1">
-        <aside className="flex flex-col gap-1 max-[900px]:flex-row max-[900px]:overflow-auto">
-          <button
-            type="button"
-            onClick={() => selectCategory(null)}
-            className={cn(
-              "rounded-[10px] bg-transparent p-3 text-left text-hm-muted max-[900px]:min-w-max",
-              !categoryId && "bg-hm-text text-white",
-            )}
-          >
-            All products
-          </button>
+      <div className="grid grid-cols-[220px_1fr] gap-[50px] max-[900px]:grid-cols-1">
+        <aside className="flex flex-col gap-1 rounded-hm-md bg-hm-surface p-5 max-[900px]:flex-row max-[900px]:gap-2 max-[900px]:overflow-auto max-[900px]:p-3">
+          <p className="m-0 mb-2 px-3 text-[10px] font-[750] tracking-[0.14em] text-hm-muted max-[900px]:hidden">
+            CATEGORIES
+          </p>
+          <CategoryLink label="All products" active={!categoryId} onClick={() => selectCategory(null)} />
           {roots.map((category) => {
             const subcategories = (categories ?? []).filter((sub) => sub.parentId === category.id);
             return (
               <div key={category.id} className="flex flex-col gap-1 max-[900px]:flex-row">
-                <button
-                  type="button"
+                <CategoryLink
+                  label={category.name}
+                  icon={category.icon}
+                  active={categoryId === category.id}
                   onClick={() => selectCategory(category.id)}
-                  className={cn(
-                    "rounded-[10px] bg-transparent p-3 text-left text-hm-muted max-[900px]:min-w-max",
-                    categoryId === category.id && "bg-hm-text text-white",
-                  )}
-                >
-                  {category.name}
-                </button>
+                />
                 {subcategories.map((sub) => (
-                  <button
-                    type="button"
+                  <CategoryLink
                     key={sub.id}
+                    label={sub.name}
+                    active={categoryId === sub.id}
                     onClick={() => selectCategory(sub.id)}
-                    className={cn(
-                      "rounded-[10px] bg-transparent p-3 pl-7 text-left text-[12px] text-hm-muted max-[900px]:min-w-max max-[900px]:pl-3",
-                      categoryId === sub.id && "bg-hm-text text-white",
-                    )}
-                  >
-                    {sub.name}
-                  </button>
+                    nested
+                  />
                 ))}
               </div>
             );
@@ -185,26 +197,94 @@ export default function ProductsPage() {
             </AnimatePresence>
           )}
 
-          {data && data.pagination.pages > 1 && (
-            <div className="mt-10 flex items-center justify-center gap-3">
-              <span className="text-[11px] text-hm-muted">
-                Page {data.pagination.page} of {data.pagination.pages}
-              </span>
-              <Button variant="quiet" size="sm" disabled={page <= 1} onClick={() => setPage((current) => current - 1)}>
-                Previous
-              </Button>
-              <Button
-                variant="quiet"
-                size="sm"
-                disabled={page >= data.pagination.pages}
-                onClick={() => setPage((current) => current + 1)}
-              >
-                Next
-              </Button>
+          {data && products.length > 0 && (
+            <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-hm-border pt-6">
+              <p className="m-0 text-[11px] text-hm-muted">
+                Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, data.pagination.total)} of{" "}
+                {data.pagination.total}
+              </p>
+
+              {data.pagination.pages > 1 && (
+                <div className="flex items-center gap-1.5">
+                  <IconButton
+                    label="Previous page"
+                    disabled={page <= 1}
+                    onClick={() => setPage((current) => current - 1)}
+                  >
+                    <Icon name="arrow" size={15} className="rotate-180" />
+                  </IconButton>
+                  {pageNumbers(page, data.pagination.pages).map((item, index) =>
+                    item === "…" ? (
+                      <span key={`gap-${index}`} className="px-1 text-[12px] text-hm-muted">
+                        …
+                      </span>
+                    ) : (
+                      <button
+                        key={item}
+                        type="button"
+                        aria-current={item === page ? "page" : undefined}
+                        onClick={() => setPage(item)}
+                        className={cn(
+                          "grid size-9 shrink-0 place-items-center rounded-full border-0 bg-transparent text-[12px] font-[650] text-hm-muted transition-colors duration-200 hover:bg-hm-field hover:text-hm-text",
+                          item === page && "bg-hm-text text-white hover:bg-hm-text hover:text-white",
+                        )}
+                      >
+                        {item}
+                      </button>
+                    ),
+                  )}
+                  <IconButton
+                    label="Next page"
+                    disabled={page >= data.pagination.pages}
+                    onClick={() => setPage((current) => current + 1)}
+                  >
+                    <Icon name="arrow" size={15} />
+                  </IconButton>
+                </div>
+              )}
             </div>
           )}
         </section>
       </div>
     </>
+  );
+}
+
+function CategoryLink({
+  label,
+  icon,
+  active,
+  nested,
+  onClick,
+}: {
+  label: string;
+  icon?: string | null;
+  active: boolean;
+  nested?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "flex min-h-10 items-center gap-2.5 rounded-hm-sm px-3 text-left text-[13px] font-[600] text-hm-muted transition-colors duration-200 hover:bg-hm-field hover:text-hm-text max-[900px]:min-w-max",
+        nested && "pl-9 text-[12px] font-[500] max-[900px]:pl-3",
+        active && "bg-hm-text text-white hover:bg-hm-text hover:text-white",
+      )}
+    >
+      {!nested && (
+        <span
+          aria-hidden="true"
+          className={cn(
+            "grid size-6 shrink-0 place-items-center overflow-hidden rounded-full bg-hm-field text-hm-muted",
+            active && "bg-white/15 text-white",
+          )}
+        >
+          {icon ? <img src={icon} alt="" className="size-full object-cover" /> : <Icon name="categories" size={12} />}
+        </span>
+      )}
+      <span className="min-w-0 truncate">{label}</span>
+    </button>
   );
 }
