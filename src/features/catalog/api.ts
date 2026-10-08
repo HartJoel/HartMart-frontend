@@ -59,5 +59,6 @@ export function toCardProduct(product: CatalogProduct) {
     name: product.name,
     price: Number(product.discountPrice ?? product.basePrice),
     image: product.images[0]?.url ?? "",
+    availableStock: product.availableStock,
   };
 }
