@@ -4,7 +4,6 @@ import { SessionProvider } from "@/features/auth/SessionContext";
 import { useAuthBootstrap } from "@/features/auth/useAuthBootstrap";
 import { NotificationsProvider } from "@/features/notifications/NotificationsContext";
 import { ReviewsProvider } from "@/features/reviews/ReviewsContext";
-import { WishlistProvider } from "@/features/wishlist/WishlistContext";
 
 /** Kicks off the `/users/me` → auth store hydration. Mounted inside QueryClientProvider. */
 function AuthBootstrap() {
@@ -20,9 +19,7 @@ export default function AppProviders({ children }: { children: ReactNode }) {
       <AuthBootstrap />
       <SessionProvider>
         <NotificationsProvider>
-          <ReviewsProvider>
-            <WishlistProvider>{children}</WishlistProvider>
-          </ReviewsProvider>
+          <ReviewsProvider>{children}</ReviewsProvider>
         </NotificationsProvider>
       </SessionProvider>
     </QueryClientProvider>

@@ -7,15 +7,39 @@ import PageHeader from "@/components/PageHeader";
 import ResultScreen from "@/components/ResultScreen";
 import RevealGroup from "@/components/RevealGroup";
 import { RevealItem } from "@/components/Reveal";
+import { useAddToCart } from "@/features/cart/api";
 import type { VendorOriginState } from "@/features/vendor-storefront/vendorOrigin";
-import { useWishlist } from "@/features/wishlist/WishlistContext";
+import { useRemoveFromWishlist, useWishlist } from "@/features/wishlist/api";
 import { formatNaira } from "@/lib/format";
-import { products } from "@/lib/mock/products";
 
 export default function WishlistPage() {
-  const { savedIds, remove } = useWishlist();
+  const { data: wishlist, isPending, isError, refetch } = useWishlist();
+  const removeFromWishlist = useRemoveFromWishlist();
+  const addToCart = useAddToCart();
   const origin = [{ label: "Wishlist", to: "/wishlist" }];
-  const saved = products.filter((product) => savedIds.includes(product.id));
+
+  if (isPending) {
+    return (
+      <RevealGroup>
+        {Array.from({ length: 3 }).map((_, index) => (
+          <div key={index} className="h-[104px] animate-pulse rounded-hm-md border-t border-hm-border bg-hm-field" />
+        ))}
+      </RevealGroup>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="grid min-h-[420px] place-items-center gap-4 text-center">
+        <p className="m-0 text-[13px] text-hm-muted">Couldn&apos;t load your wishlist. Please try again.</p>
+        <Button variant="ghost" size="sm" onClick={() => refetch()}>
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  const saved = wishlist?.items ?? [];
 
   return (
     <>
@@ -42,42 +66,68 @@ export default function WishlistPage() {
         />
       ) : (
         <RevealGroup>
-          {saved.map((product) => (
-            <RevealItem key={product.id}>
-              <article className="flex flex-wrap items-center gap-5 border-t border-hm-border py-5">
-                <Link to={`/products/${product.id}`} className="shrink-0">
-                  <img className="aspect-square w-24 rounded-hm-sm object-cover" src={product.image} alt="" />
-                </Link>
+          {saved.map((item) => {
+            const product = item.product;
+            const price = Number(product.discountPrice ?? product.basePrice);
 
-                <div className="min-w-[160px] flex-1">
-                  <Link to={`/products/${product.id}`} className="text-hm-text no-underline">
-                    <strong>{product.name}</strong>
+            return (
+              <RevealItem key={item.id}>
+                <article className="flex flex-wrap items-center gap-5 border-t border-hm-border py-5">
+                  <Link to={`/products/${product.id}`} className="shrink-0">
+                    {product.images[0] ? (
+                      <img className="aspect-square w-24 rounded-hm-sm object-cover" src={product.images[0].url} alt="" />
+                    ) : (
+                      <span className="grid aspect-square w-24 place-items-center rounded-hm-sm bg-hm-field text-hm-muted">
+                        <Icon name="shop" size={20} />
+                      </span>
+                    )}
                   </Link>
-                  <Link
-                    to={`/vendors/${product.vendorId}`}
-                    state={{ origin } satisfies VendorOriginState}
-                    className="mt-1.5 block text-[10px] text-hm-muted no-underline hover:text-hm-text"
-                  >
-                    Sold by {product.vendor}
-                  </Link>
-                </div>
 
-                <b className="whitespace-nowrap">{formatNaira(product.price)}</b>
+                  <div className="min-w-[160px] flex-1">
+                    <Link to={`/products/${product.id}`} className="text-hm-text no-underline">
+                      <strong>{product.name}</strong>
+                    </Link>
+                    <Link
+                      to={`/vendors/${product.vendorId}`}
+                      state={{ origin } satisfies VendorOriginState}
+                      className="mt-1.5 block text-[10px] text-hm-muted no-underline hover:text-hm-text"
+                    >
+                      Visit storefront
+                    </Link>
+                  </div>
 
-                <div className="flex items-center gap-3">
-                  <Button variant="ghost" size="sm" disabled title="Wishlist isn't connected yet">
-                    Move to cart
-                  </Button>
-                  <Link to={`/products/${product.id}`} className={buttonClasses({ variant: "quiet", size: "sm" })}>
-                    View product
-                  </Link>
-                  <IconButton tone="danger" label={`Remove ${product.name}`} onClick={() => remove(product.id)}>
-                    <Icon name="close" size={13} />
-                  </IconButton>
-                </div>
-              </article>
-            </RevealItem>
-          ))}
+                  <b className="whitespace-nowrap">{formatNaira(price)}</b>
+
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      disabled={addToCart.isPending}
+                      onClick={() =>
+                        addToCart.mutate(
+                          { productId: product.id },
+                          { onSuccess: () => removeFromWishlist.mutate(product.id) },
+                        )
+                      }
+                    >
+                      {addToCart.isPending ? "Moving…" : "Move to cart"}
+                    </Button>
+                    <Link to={`/products/${product.id}`} className={buttonClasses({ variant: "quiet", size: "sm" })}>
+                      View product
+                    </Link>
+                    <IconButton
+                      tone="danger"
+                      label={`Remove ${product.name}`}
+                      disabled={removeFromWishlist.isPending}
+                      onClick={() => removeFromWishlist.mutate(product.id)}
+                    >
+                      <Icon name="close" size={13} />
+                    </IconButton>
+                  </div>
+                </article>
+              </RevealItem>
+            );
+          })}
         </RevealGroup>
       )}
     </>

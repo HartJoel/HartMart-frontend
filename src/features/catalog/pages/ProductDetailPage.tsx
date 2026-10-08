@@ -11,6 +11,7 @@ import { useAddToCart } from "@/features/cart/api";
 import { useAuthStore } from "@/features/auth/store";
 import { useVendor } from "@/features/vendor-storefront/api";
 import type { VendorOriginState } from "@/features/vendor-storefront/vendorOrigin";
+import { useAddToWishlist, useRemoveFromWishlist, useWishlistCheck } from "@/features/wishlist/api";
 import { formatNaira, getInitials } from "@/lib/format";
 
 export default function ProductDetailPage() {
@@ -20,6 +21,9 @@ export default function ProductDetailPage() {
   const { data: vendor } = useVendor(product?.vendorId);
   const isAuthenticated = useAuthStore((state) => state.status === "authenticated");
   const addToCart = useAddToCart();
+  const { data: wishlistCheck } = useWishlistCheck(isAuthenticated ? id : undefined);
+  const addToWishlist = useAddToWishlist();
+  const removeFromWishlist = useRemoveFromWishlist();
   const [quantity, setQuantity] = useState(1);
   const [justAdded, setJustAdded] = useState(false);
 
@@ -60,9 +64,17 @@ export default function ProductDetailPage() {
   const price = product.discountPrice ? Number(product.discountPrice) : Number(product.basePrice);
 
   const productId = product.id;
+  const isSaved = wishlistCheck?.inWishlist ?? false;
+  const isTogglingWishlist = addToWishlist.isPending || removeFromWishlist.isPending;
+
   function addProductToCart() {
     setJustAdded(false);
     addToCart.mutate({ productId, quantity }, { onSuccess: () => setJustAdded(true) });
+  }
+
+  function toggleWishlist() {
+    if (isSaved) removeFromWishlist.mutate(productId);
+    else addToWishlist.mutate(productId);
   }
 
   return (
@@ -134,16 +146,34 @@ export default function ProductDetailPage() {
                 Sign in to buy
               </Link>
             )}
-            <Button variant="ghost" disabled aria-label="Save to wishlist" title="Wishlist isn't connected yet">
-              ♡
-            </Button>
+            {isAuthenticated ? (
+              <Button
+                variant="ghost"
+                disabled={isTogglingWishlist}
+                aria-pressed={isSaved}
+                aria-label={isSaved ? "Remove from wishlist" : "Save to wishlist"}
+                title={isSaved ? "Remove from wishlist" : "Save to wishlist"}
+                onClick={toggleWishlist}
+                className={isSaved ? "text-hm-error" : undefined}
+              >
+                {isSaved ? "♥" : "♡"}
+              </Button>
+            ) : (
+              <Button variant="ghost" disabled aria-label="Save to wishlist" title="Sign in to save this">
+                ♡
+              </Button>
+            )}
           </div>
           {addToCart.isError && (
             <p role="alert" className="mt-2 text-[10px] text-hm-error">
               Couldn&apos;t add this to your cart. Please try again.
             </p>
           )}
-          <p className="mt-2 text-[10px] text-hm-muted">Wishlist isn&apos;t connected yet.</p>
+          {(addToWishlist.isError || removeFromWishlist.isError) && (
+            <p role="alert" className="mt-2 text-[10px] text-hm-error">
+              Couldn&apos;t update your wishlist. Please try again.
+            </p>
+          )}
 
           {vendor && (
             <article className="mt-12 flex items-center gap-3.5 rounded-hm-md bg-hm-surface p-6">
