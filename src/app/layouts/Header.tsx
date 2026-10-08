@@ -6,7 +6,7 @@ import { buttonClasses } from "@/components/Button";
 import Icon, { type IconName } from "@/components/Icon";
 import { useSession } from "@/features/auth/SessionContext";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
-import { useCart } from "@/features/cart/CartContext";
+import { useCart } from "@/features/cart/api";
 import { useWishlist } from "@/features/wishlist/WishlistContext";
 import { cn } from "@/lib/cn";
 import { useMotionPresets } from "@/lib/motion";
@@ -66,7 +66,8 @@ function HeaderIconLink({
 export default function Header() {
   const { unreadCount } = useNotifications();
   const { savedIds } = useWishlist();
-  const { itemCount } = useCart();
+  const { data: cart } = useCart();
+  const itemCount = cart?.itemCount ?? 0;
   const { roles } = useSession();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");

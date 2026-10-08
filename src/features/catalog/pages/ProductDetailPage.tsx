@@ -1,21 +1,27 @@
 import { useState } from "react";
-import { Link, useParams } from "react-router";
-import Button from "@/components/Button";
+import { Link, useLocation, useParams } from "react-router";
+import Button, { buttonClasses } from "@/components/Button";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Icon from "@/components/Icon";
 import QuantityStepper from "@/components/QuantityStepper";
 import Rating from "@/components/Rating";
 import { useProduct } from "@/features/catalog/api";
 import ProductReviews from "@/features/catalog/components/ProductReviews";
+import { useAddToCart } from "@/features/cart/api";
+import { useAuthStore } from "@/features/auth/store";
 import { useVendor } from "@/features/vendor-storefront/api";
 import type { VendorOriginState } from "@/features/vendor-storefront/vendorOrigin";
 import { formatNaira, getInitials } from "@/lib/format";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
+  const location = useLocation();
   const { data: product, isPending, isError, refetch } = useProduct(id);
   const { data: vendor } = useVendor(product?.vendorId);
+  const isAuthenticated = useAuthStore((state) => state.status === "authenticated");
+  const addToCart = useAddToCart();
   const [quantity, setQuantity] = useState(1);
+  const [justAdded, setJustAdded] = useState(false);
 
   if (isPending) {
     return (
@@ -52,6 +58,12 @@ export default function ProductDetailPage() {
   const inStock = product.availableStock > 0;
   const images = product.images.length > 0 ? product.images : null;
   const price = product.discountPrice ? Number(product.discountPrice) : Number(product.basePrice);
+
+  const productId = product.id;
+  function addProductToCart() {
+    setJustAdded(false);
+    addToCart.mutate({ productId, quantity }, { onSuccess: () => setJustAdded(true) });
+  }
 
   return (
     <>
@@ -109,14 +121,29 @@ export default function ProductDetailPage() {
             ) : (
               <span>Out of stock</span>
             )}
-            <Button disabled title="Cart isn't connected yet">
-              Add to Cart
-            </Button>
+            {isAuthenticated ? (
+              <Button disabled={!inStock || addToCart.isPending} onClick={addProductToCart}>
+                {addToCart.isPending ? "Adding…" : justAdded ? "Added ✓" : "Add to Cart"}
+              </Button>
+            ) : (
+              <Link
+                className={buttonClasses()}
+                to="/login"
+                state={{ from: location, notice: "Sign in to add this to your cart." }}
+              >
+                Sign in to buy
+              </Link>
+            )}
             <Button variant="ghost" disabled aria-label="Save to wishlist" title="Wishlist isn't connected yet">
               ♡
             </Button>
           </div>
-          <p className="mt-2 text-[10px] text-hm-muted">Cart and wishlist aren&apos;t connected yet.</p>
+          {addToCart.isError && (
+            <p role="alert" className="mt-2 text-[10px] text-hm-error">
+              Couldn&apos;t add this to your cart. Please try again.
+            </p>
+          )}
+          <p className="mt-2 text-[10px] text-hm-muted">Wishlist isn&apos;t connected yet.</p>
 
           {vendor && (
             <article className="mt-12 flex items-center gap-3.5 rounded-hm-md bg-hm-surface p-6">

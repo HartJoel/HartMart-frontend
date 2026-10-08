@@ -7,7 +7,6 @@ import PageHeader from "@/components/PageHeader";
 import ResultScreen from "@/components/ResultScreen";
 import RevealGroup from "@/components/RevealGroup";
 import { RevealItem } from "@/components/Reveal";
-import { useCart } from "@/features/cart/CartContext";
 import type { VendorOriginState } from "@/features/vendor-storefront/vendorOrigin";
 import { useWishlist } from "@/features/wishlist/WishlistContext";
 import { formatNaira } from "@/lib/format";
@@ -15,7 +14,6 @@ import { products } from "@/lib/mock/products";
 
 export default function WishlistPage() {
   const { savedIds, remove } = useWishlist();
-  const { addItem } = useCart();
   const origin = [{ label: "Wishlist", to: "/wishlist" }];
   const saved = products.filter((product) => savedIds.includes(product.id));
 
@@ -67,14 +65,7 @@ export default function WishlistPage() {
                 <b className="whitespace-nowrap">{formatNaira(product.price)}</b>
 
                 <div className="flex items-center gap-3">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      addItem(product);
-                      remove(product.id);
-                    }}
-                  >
+                  <Button variant="ghost" size="sm" disabled title="Wishlist isn't connected yet">
                     Move to cart
                   </Button>
                   <Link to={`/products/${product.id}`} className={buttonClasses({ variant: "quiet", size: "sm" })}>
