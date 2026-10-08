@@ -1,24 +1,4 @@
-export type Vendor = {
-  id: number;
-  /** Store name, shown as the storefront title. */
-  name: string;
-  /** One-line summary shown on cards and banners. */
-  tagline: string;
-  /** Full store description shown on the storefront. */
-  description: string;
-  /** Short mark shown in place of a store logo until vendors upload one. */
-  initials: string;
-  category: string;
-  location: string;
-  verified: boolean;
-  /** Average rating out of 5. */
-  rating: number;
-  reviewCount: number;
-  /** ISO date the store joined. */
-  joined: string;
-};
-
-/** Shape returned by the real `GET /vendor/:id`. Distinct from the mock `Vendor` above. */
+/** Shape returned by `GET /vendor/:id`, `GET /vendor`, `GET /vendor/top`, `GET /vendor/me` and `POST /vendor/apply`. */
 export type VendorProfile = {
   id: string;
   userId: string;
@@ -45,4 +25,49 @@ export type VendorProfile = {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+};
+
+/** Body for `POST /vendor/apply`. */
+export type VendorApplicationInput = {
+  storeName: string;
+  storeDescription: string;
+  storeCategory: string;
+  businessRegistration: string;
+  taxId: string;
+  businessAddress: string;
+  businessPhone: string;
+  bankName: string;
+  bankAccountNumber: string;
+  bankAccountName: string;
+  bankCode: string;
+};
+
+/** Body for `PATCH /vendor/me`. `storeLogo`/`storeBanner` are uploaded as files, not URLs. */
+export type VendorProfileInput = {
+  storeDescription: string;
+  storeLogo?: File;
+  storeBanner?: File;
+};
+
+/** Shape returned by the admin-only `GET /vendor/:id/metrics` — a leaner projection of `VendorProfile`. */
+export type VendorMetrics = {
+  averageRating: number;
+  totalReviews: number;
+  status: string;
+  verifiedAt: string | null;
+  createdAt: string;
+};
+
+/** Shape returned by `GET /vendor/me/analytics`, for the vendor dashboard home. */
+export type VendorAnalytics = {
+  vendorId: string;
+  totalSales: number;
+  totalRevenue: number;
+  averageOrderValue: number;
+  /** Percentage points (0–100), assumed — only seen as 0 so far, so the scale isn't confirmed. */
+  fulfillmentRate: number;
+  cancellationRate: number;
+  returnRate: number;
+  /** Seen only as `[]` so far — item shape unconfirmed. Not rendered yet. */
+  monthlyData: unknown[];
 };

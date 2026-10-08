@@ -12,6 +12,8 @@ export type ProductsParams = {
   search?: string;
   /** Not in the documented query params, but confirmed working against the live API. */
   categoryId?: string;
+  /** Not in the documented query params, but confirmed working against the live API — powers the vendor storefront. */
+  vendorId?: string;
 };
 
 /**
@@ -24,6 +26,7 @@ export function useProducts(params: ProductsParams = {}) {
   if (params.limit !== undefined) query.set("limit", String(params.limit));
   if (params.search) query.set("search", params.search);
   if (params.categoryId) query.set("categoryId", params.categoryId);
+  if (params.vendorId) query.set("vendorId", params.vendorId);
   const search = query.toString();
 
   return useQuery({

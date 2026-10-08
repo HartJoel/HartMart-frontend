@@ -1,21 +1,5 @@
 // Placeholder platform data until the admin API is wired.
 
-export type VendorApplication = {
-  id: number;
-  store: string;
-  owner: string;
-  date: string;
-  category: string;
-  rc: string;
-  location: string;
-};
-
-export const initialApplications: VendorApplication[] = [
-  { id: 1, store: "Ìbàdàn Loom", owner: "Funmi Akinola", date: "19 Jun 2025", category: "Home & Living", rc: "RC 8291042", location: "Ibadan, Oyo" },
-  { id: 2, store: "Mainland Kicks", owner: "Femi Lawal", date: "18 Jun 2025", category: "Fashion & Apparel", rc: "RC 7128920", location: "Yaba, Lagos" },
-  { id: 3, store: "Scent House Lagos", owner: "Dara Phillips", date: "17 Jun 2025", category: "Beauty", rc: "RC 9401288", location: "Ikoyi, Lagos" },
-];
-
 export const auditLogs = [
   { timestamp: "20 Jun 2025 · 14:32:08", actor: "kemi@hartmart.ng", action: "VENDOR_VERIFIED", resource: "Vendor · AjoTech Gadgets" },
   { timestamp: "20 Jun 2025 · 14:18:42", actor: "system", action: "PAYMENT_CONFIRMED", resource: "Order · HM-2148" },

@@ -2,10 +2,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, apiRequestPaged } from "@/lib/api/client";
 import type { AdminUserSummary } from "@/types/auth";
 import type { Category } from "@/types/category";
+import type { VendorMetrics, VendorProfile } from "@/types/vendor";
 
 const USERS_PREFIX = "/api/v1/users";
 const CATEGORY_PREFIX = "/api/v1/category";
+const VENDOR_PREFIX = "/api/v1/vendor";
 const CATEGORIES_KEY = ["categories"] as const;
+/** Shared with the public `useVendors()`/`useVendor()` in vendor-storefront/api — moderation actions invalidate the same cache. */
+const VENDORS_KEY = ["vendors"] as const;
 
 export type UsersParams = {
   role?: string;
@@ -96,5 +100,45 @@ export function useDeleteCategory() {
   return useMutation({
     mutationFn: (id: string) => apiRequest<void>(`${CATEGORY_PREFIX}/${id}`, { method: "DELETE" }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: CATEGORIES_KEY }),
+  });
+}
+
+/** A vendor's rating/status summary, for the moderation detail view. */
+export function useVendorMetrics(id: string | undefined) {
+  return useQuery({
+    queryKey: ["admin", "vendor", id, "metrics"],
+    queryFn: () => apiRequest<VendorMetrics>(`${VENDOR_PREFIX}/${id}/metrics`),
+    enabled: id !== undefined,
+  });
+}
+
+/** Approves a pending vendor application. */
+export function useVerifyVendor() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => apiRequest<VendorProfile>(`${VENDOR_PREFIX}/${id}/verify`, { method: "POST" }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: VENDORS_KEY }),
+  });
+}
+
+/** Rejects a pending vendor application with a reason shown to the applicant. */
+export function useRejectVendor() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
+      apiRequest<VendorProfile>(`${VENDOR_PREFIX}/${id}/reject`, { method: "POST", body: JSON.stringify({ reason }) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: VENDORS_KEY }),
+  });
+}
+
+/** Suspends an active vendor, e.g. for a trust & safety violation. */
+export function useSuspendVendor() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => apiRequest<VendorProfile>(`${VENDOR_PREFIX}/${id}/suspend`, { method: "POST" }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: VENDORS_KEY }),
   });
 }

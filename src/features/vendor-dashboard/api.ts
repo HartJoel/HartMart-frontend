@@ -2,13 +2,48 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest, type PaginationMeta } from "@/lib/api/client";
 import type { Category } from "@/types/category";
 import type { ProductStockInput, VendorProduct, VendorProductInput } from "@/types/product";
+import type { VendorAnalytics, VendorProfile, VendorProfileInput } from "@/types/vendor";
 
 const PRODUCTS_PREFIX = "/api/v1/products";
 const CATEGORY_PREFIX = "/api/v1/category";
+const VENDOR_PREFIX = "/api/v1/vendor";
 const VENDOR_PRODUCTS_KEY = ["vendor", "products"] as const;
+const VENDOR_PROFILE_KEY = ["vendor", "me"] as const;
 
 function productKey(id: string) {
   return ["products", id] as const;
+}
+
+/** The logged-in vendor's own profile, for the dashboard sidebar and the Store Settings page. */
+export function useVendorProfile() {
+  return useQuery({
+    queryKey: VENDOR_PROFILE_KEY,
+    queryFn: () => apiRequest<VendorProfile>(`${VENDOR_PREFIX}/me`),
+  });
+}
+
+/** Sales/performance summary for the dashboard home's metric cards. */
+export function useVendorAnalytics() {
+  return useQuery({
+    queryKey: ["vendor", "me", "analytics"],
+    queryFn: () => apiRequest<VendorAnalytics>(`${VENDOR_PREFIX}/me/analytics`),
+  });
+}
+
+/** Updates store description and, optionally, the logo/banner images. Always multipart: the API accepts files for both. */
+export function useUpdateVendorProfile() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: VendorProfileInput) => {
+      const form = new FormData();
+      form.set("storeDescription", input.storeDescription);
+      if (input.storeLogo) form.set("storeLogo", input.storeLogo);
+      if (input.storeBanner) form.set("storeBanner", input.storeBanner);
+      return apiRequest<VendorProfile>(`${VENDOR_PREFIX}/me`, { method: "PATCH", body: form });
+    },
+    onSuccess: (profile) => queryClient.setQueryData(VENDOR_PROFILE_KEY, profile),
+  });
 }
 
 export type VendorProductsParams = { page?: number; limit?: number };

@@ -11,8 +11,3 @@ export const products: Product[] = [
   { id: 7, name: "Oud No. 04", price: 22000, vendor: "Scent House Lagos", vendorId: 7, image: "https://images.unsplash.com/photo-1640975972263-1f73398e943b?auto=format&fit=crop&w=700&q=85" },
   { id: 8, name: "Smart Essentials Set", price: 68500, vendor: "AjoTech Gadgets", vendorId: 2, image: "https://images.unsplash.com/photo-1550029402-8280f657d8d1?auto=format&fit=crop&w=700&q=85" },
 ];
-
-/** Products listed by one vendor. The public API has no per-vendor product query yet (see the blueprint). */
-export function productsByVendor(vendorId: number) {
-  return products.filter((product) => product.vendorId === vendorId);
-}
