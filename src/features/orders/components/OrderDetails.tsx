@@ -1,6 +1,7 @@
 import Icon from "@/components/Icon";
 import StatusBadge from "@/components/StatusBadge";
 import { parseShippingAddress, useOrderTimeline } from "@/features/orders/api";
+import { useMyPayments } from "@/features/payment/api";
 import OrderReviews from "@/features/reviews/components/OrderReviews";
 import { formatDate, formatDateTime, formatNaira } from "@/lib/format";
 import { orderStatusTone } from "@/lib/orderStatus";
@@ -23,6 +24,9 @@ function summaryRows(order: Order): [string, number][] {
 export default function OrderDetails({ order }: { order: Order }) {
   const address = parseShippingAddress(order);
   const { data: timeline, isPending: timelinePending, isError: timelineError } = useOrderTimeline(order.id);
+  // No `orderId` filter on GET /payment, so this pulls the user's recent payments and matches client-side.
+  const { data: paymentsPage } = useMyPayments({ limit: 100 });
+  const payment = paymentsPage?.data.find((item) => item.orderId === order.id);
 
   return (
     <div className="grid gap-10">
@@ -58,7 +62,7 @@ export default function OrderDetails({ order }: { order: Order }) {
       </section>
 
       <section className="rounded-hm-md bg-hm-field p-5">
-        <h3 className="m-0 mb-4 text-[13px] font-[650]">Payment summary</h3>
+        <h3 className="m-0 mb-4 text-[13px] font-[650]">Order summary</h3>
         <dl className="m-0 grid gap-3 text-[12px]">
           {summaryRows(order).map(([label, amount]) => (
             <div key={label} className="flex justify-between gap-4">
@@ -72,6 +76,32 @@ export default function OrderDetails({ order }: { order: Order }) {
           </div>
         </dl>
       </section>
+
+      {payment && (
+        <section className="grid gap-3 text-[12px]">
+          <h3 className="m-0 text-[13px] font-[650]">Payment</h3>
+          <div className="flex justify-between gap-4">
+            <span className="text-hm-muted">Status</span>
+            <StatusBadge tone={payment.status === "PENDING" ? "warning" : "success"} className="capitalize">
+              {payment.status.toLowerCase()}
+            </StatusBadge>
+          </div>
+          <div className="flex justify-between gap-4">
+            <span className="text-hm-muted">Method</span>
+            <span className="font-[650] capitalize">{payment.method.toLowerCase()}</span>
+          </div>
+          <div className="flex justify-between gap-4">
+            <span className="text-hm-muted">Reference</span>
+            <span className="font-[650]">{payment.reference}</span>
+          </div>
+          {payment.paidAt && (
+            <div className="flex justify-between gap-4">
+              <span className="text-hm-muted">Paid</span>
+              <span className="font-[650]">{formatDateTime(payment.paidAt)}</span>
+            </div>
+          )}
+        </section>
+      )}
 
       {address && (
         <section>

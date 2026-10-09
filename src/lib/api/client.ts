@@ -84,3 +84,17 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
   return envelope.data;
 }
 
+/**
+ * For the one list endpoint confirmed to carry `pagination` as a sibling of `data` rather than
+ * nested inside it — `GET /payment`. Most list endpoints use the nested shape instead
+ * (`apiRequest<{ data: T[]; pagination }>`); check a live response before reusing this elsewhere.
+ */
+export async function apiRequestPage<T>(
+  path: string,
+  init: RequestInit = {},
+): Promise<{ data: T; pagination: PaginationMeta }> {
+  const envelope = await requestEnvelope<T>(path, init);
+  if (!envelope.pagination) throw new Error(`Expected a paginated response from ${path}`);
+  return { data: envelope.data, pagination: envelope.pagination };
+}
+
