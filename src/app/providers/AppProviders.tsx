@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState, type ReactNode } from "react";
 import { useAuthBootstrap } from "@/features/auth/useAuthBootstrap";
 import { NotificationsProvider } from "@/features/notifications/NotificationsContext";
@@ -19,6 +20,7 @@ export default function AppProviders({ children }: { children: ReactNode }) {
       <NotificationsProvider>
         <ReviewsProvider>{children}</ReviewsProvider>
       </NotificationsProvider>
+      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   );
 }
