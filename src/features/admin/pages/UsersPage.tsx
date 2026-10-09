@@ -1,4 +1,4 @@
-import { useMemo, useState, type ChangeEvent } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 import { AnimatePresence } from "framer-motion";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Button from "@/components/Button";
@@ -9,6 +9,7 @@ import StatusBadge from "@/components/StatusBadge";
 import UserDrawer from "@/features/admin/components/UserDrawer";
 import { useUsers } from "@/features/admin/api";
 import { getInitials } from "@/lib/format";
+import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import { cn } from "@/lib/cn";
 
 const selectClass = "min-h-[46px] rounded-hm-sm border-0 bg-hm-surface px-3 text-[10px] outline-0";
@@ -35,15 +36,17 @@ export default function UsersPage() {
   const [page, setPage] = useState(1);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const { data, isPending, isError, refetch } = useUsers({ role, status, page, limit: PAGE_SIZE });
+  const debouncedSearch = useDebouncedValue(search, 400);
+  useEffect(() => setPage(1), [debouncedSearch]);
 
-  // The API only filters by role/status; search narrows within whatever page came back.
-  const filtered = useMemo(() => {
-    const rows = data?.data ?? [];
-    const query = search.trim().toLowerCase();
-    if (!query) return rows;
-    return rows.filter((user) => `${user.name} ${user.email}`.toLowerCase().includes(query));
-  }, [data, search]);
+  const { data, isPending, isError, refetch } = useUsers({
+    role,
+    status,
+    search: debouncedSearch || undefined,
+    page,
+    limit: PAGE_SIZE,
+  });
+  const rows = data?.data ?? [];
 
   function updateRole(event: ChangeEvent<HTMLSelectElement>) {
     setRole(event.target.value || undefined);
@@ -71,7 +74,7 @@ export default function UsersPage() {
             aria-label="Search users"
             className="w-full border-0 bg-transparent text-[11px] outline-0"
             type="search"
-            placeholder="Search this page by name or email"
+            placeholder="Search by name or email"
             value={search}
             onChange={(event: ChangeEvent<HTMLInputElement>) => setSearch(event.target.value)}
           />
@@ -91,7 +94,7 @@ export default function UsersPage() {
           ))}
         </select>
         <span className="self-center text-[9px] text-hm-muted max-[760px]:justify-self-end max-[480px]:justify-self-start">
-          {data ? `${filtered.length} of ${data.pagination.total} results` : "—"}
+          {data ? `${data.pagination.total} result${data.pagination.total === 1 ? "" : "s"}` : "—"}
         </span>
       </div>
 
@@ -120,7 +123,7 @@ export default function UsersPage() {
                     </td>
                   </tr>
                 ))
-              : filtered.length === 0
+              : rows.length === 0
                 ? (
                     <tr>
                       <td className={tableCell} colSpan={3}>
@@ -128,7 +131,7 @@ export default function UsersPage() {
                       </td>
                     </tr>
                   )
-                : filtered.map((user) => (
+                : rows.map((user) => (
                     <tr
                       key={user.id}
                       tabIndex={0}

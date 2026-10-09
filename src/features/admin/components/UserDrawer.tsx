@@ -3,7 +3,7 @@ import Icon from "@/components/Icon";
 import IconButton from "@/components/IconButton";
 import StatusBadge from "@/components/StatusBadge";
 import { useUser } from "@/features/admin/api";
-import { getInitials } from "@/lib/format";
+import { formatDate, getInitials } from "@/lib/format";
 import { easeOut, useMotionPresets } from "@/lib/motion";
 
 type UserDrawerProps = {
@@ -70,6 +70,7 @@ export default function UserDrawer({ userId, onClose }: UserDrawerProps) {
             </div>
             <div className="mt-16 flex flex-col">
               {[
+                ["Member since", formatDate(user.createdAt)],
                 ["Email verified", user.emailVerified ? "Yes" : "No"],
                 ["User ID", user.id],
               ].map(([label, value]) => (

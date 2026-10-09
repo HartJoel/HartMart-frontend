@@ -14,8 +14,8 @@ export type AuthUser = {
   emailVerified?: boolean;
 };
 
-/** A row from the admin user directory (`GET /users`, `GET /users/:id`) — adds the account `status`. */
-export type AdminUserSummary = AuthUser & { status: string };
+/** A row from the admin user directory (`GET /admin/users`) or single lookup (`GET /users/:id`) — adds the account `status` and join date. */
+export type AdminUserSummary = AuthUser & { status: string; createdAt: string };
 
 export type LoginPayload = {
   email: string;

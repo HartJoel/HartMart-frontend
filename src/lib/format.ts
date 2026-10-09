@@ -19,6 +19,20 @@ export function formatDate(iso: string) {
   return shortDate.format(new Date(iso));
 }
 
+const shortDateTime = new Intl.DateTimeFormat("en-NG", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+});
+
+/** Formats an ISO timestamp for display, e.g. "12 Sep 2026, 14:32:08". */
+export function formatDateTime(iso: string) {
+  return shortDateTime.format(new Date(iso));
+}
+
 const relative = new Intl.RelativeTimeFormat("en-NG", { numeric: "auto" });
 
 /** Formats an ISO timestamp relative to now, e.g. "2 hours ago". */

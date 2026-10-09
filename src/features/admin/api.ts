@@ -1,10 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiRequest, apiRequestPaged } from "@/lib/api/client";
+import { apiRequest, type PaginationMeta } from "@/lib/api/client";
 import type { AdminUserSummary } from "@/types/auth";
+import type { AdminDashboardStats, AuditLog } from "@/types/admin";
 import type { Category } from "@/types/category";
 import type { VendorMetrics, VendorProfile } from "@/types/vendor";
 
-const USERS_PREFIX = "/api/v1/users";
+const ADMIN_PREFIX = "/api/v1/admin";
+const USERS_PREFIX = `${ADMIN_PREFIX}/users`;
+/** Single-user lookup lives outside the admin namespace — confirmed separately from the list endpoint. */
+const USER_DETAIL_PREFIX = "/api/v1/users";
 const CATEGORY_PREFIX = "/api/v1/category";
 const VENDOR_PREFIX = "/api/v1/vendor";
 const CATEGORIES_KEY = ["categories"] as const;
@@ -14,6 +18,7 @@ const VENDORS_KEY = ["vendors"] as const;
 export type UsersParams = {
   role?: string;
   status?: string;
+  search?: string;
   page?: number;
   limit?: number;
 };
@@ -22,17 +27,23 @@ function usersQuery(params: UsersParams) {
   const query = new URLSearchParams();
   if (params.role) query.set("role", params.role);
   if (params.status) query.set("status", params.status);
+  if (params.search) query.set("search", params.search);
   if (params.page !== undefined) query.set("page", String(params.page));
   if (params.limit !== undefined) query.set("limit", String(params.limit));
   const value = query.toString();
   return value ? `?${value}` : "";
 }
 
-/** Admin-only user directory, filterable by role/status and paginated by the API. */
+/**
+ * Admin-only user directory, filterable by role/status/search and paginated by the API.
+ * The pagination block sits nested inside `data` (`{ data: { data: [...], pagination } }`),
+ * same convention as the catalog and vendor-dashboard product lists.
+ */
 export function useUsers(params: UsersParams) {
   return useQuery({
     queryKey: ["admin", "users", params],
-    queryFn: () => apiRequestPaged<AdminUserSummary[]>(`${USERS_PREFIX}${usersQuery(params)}`),
+    queryFn: () =>
+      apiRequest<{ data: AdminUserSummary[]; pagination: PaginationMeta }>(`${USERS_PREFIX}${usersQuery(params)}`),
   });
 }
 
@@ -40,8 +51,46 @@ export function useUsers(params: UsersParams) {
 export function useUser(id: string | undefined) {
   return useQuery({
     queryKey: ["admin", "users", id],
-    queryFn: () => apiRequest<AdminUserSummary>(`${USERS_PREFIX}/${id}`),
+    queryFn: () => apiRequest<AdminUserSummary>(`${USER_DETAIL_PREFIX}/${id}`),
     enabled: id !== undefined,
+  });
+}
+
+/** Platform KPI summary for the admin command centre. */
+export function useAdminDashboard() {
+  return useQuery({
+    queryKey: ["admin", "dashboard"],
+    queryFn: () => apiRequest<AdminDashboardStats>(`${ADMIN_PREFIX}/dashboard`),
+  });
+}
+
+export type ActivityLogsParams = {
+  action?: string;
+  resource?: string;
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  limit?: number;
+};
+
+function activityLogsQuery(params: ActivityLogsParams) {
+  const query = new URLSearchParams();
+  if (params.action) query.set("action", params.action);
+  if (params.resource) query.set("resource", params.resource);
+  if (params.startDate) query.set("startDate", params.startDate);
+  if (params.endDate) query.set("endDate", params.endDate);
+  if (params.page !== undefined) query.set("page", String(params.page));
+  if (params.limit !== undefined) query.set("limit", String(params.limit));
+  const value = query.toString();
+  return value ? `?${value}` : "";
+}
+
+/** Audit/activity trail, filterable by action/resource/date range and paginated by the API. */
+export function useActivityLogs(params: ActivityLogsParams) {
+  return useQuery({
+    queryKey: ["admin", "logs", params],
+    queryFn: () =>
+      apiRequest<{ data: AuditLog[]; pagination: PaginationMeta }>(`${ADMIN_PREFIX}/logs${activityLogsQuery(params)}`),
   });
 }
 
