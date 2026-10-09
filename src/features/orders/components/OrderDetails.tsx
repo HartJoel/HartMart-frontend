@@ -1,6 +1,7 @@
 import Icon from "@/components/Icon";
 import StatusBadge from "@/components/StatusBadge";
 import { parseShippingAddress, useOrderTimeline } from "@/features/orders/api";
+import OrderReviews from "@/features/reviews/components/OrderReviews";
 import { formatDate, formatDateTime, formatNaira } from "@/lib/format";
 import { orderStatusTone } from "@/lib/orderStatus";
 import { cn } from "@/lib/cn";
@@ -146,6 +147,8 @@ export default function OrderDetails({ order }: { order: Order }) {
           </ol>
         )}
       </section>
+
+      {order.status === "DELIVERED" && <OrderReviews orderId={order.id} items={order.items} />}
     </div>
   );
 }

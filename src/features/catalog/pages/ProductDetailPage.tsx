@@ -204,7 +204,7 @@ export default function ProductDetailPage() {
         </section>
       </div>
 
-      <ProductReviews />
+      <ProductReviews productId={product.id} vendorUserId={vendor?.userId} />
     </>
   );
 }
