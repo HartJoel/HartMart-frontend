@@ -5,11 +5,14 @@ import Modal from "@/components/Modal";
 import Rating from "@/components/Rating";
 import ReviewForm from "@/features/reviews/components/ReviewForm";
 import { useReviews } from "@/features/reviews/ReviewsContext";
-import type { Order } from "@/types/order";
 import type { Product } from "@/types/product";
 
-/** Lets the shopper rate each item in a delivered order. */
-export default function OrderReviews({ order }: { order: Order }) {
+/**
+ * Lets the shopper rate each item in a delivered order. Takes `orderId`/`items` directly rather
+ * than an `Order` — the real Orders API doesn't return line items yet, so callers need their own
+ * source for `items` until that's confirmed.
+ */
+export default function OrderReviews({ orderId, items }: { orderId: string; items: Product[] }) {
   const { getReview, submitReview } = useReviews();
   const [reviewing, setReviewing] = useState<Product | null>(null);
 
@@ -19,8 +22,8 @@ export default function OrderReviews({ order }: { order: Order }) {
       <p className="m-0 mt-1 mb-4 text-[12px] text-hm-muted">Your feedback helps independent vendors grow.</p>
 
       <ul className="m-0 list-none p-0">
-        {order.items.map((product) => {
-          const review = getReview(order.id, product.id);
+        {items.map((product) => {
+          const review = getReview(orderId, product.id);
 
           return (
             <li
@@ -52,9 +55,9 @@ export default function OrderReviews({ order }: { order: Order }) {
         {reviewing && (
           <Modal title={reviewing.name} eyebrow="LEAVE A REVIEW" onClose={() => setReviewing(null)}>
             <ReviewForm
-              initial={getReview(order.id, reviewing.id)}
+              initial={getReview(orderId, reviewing.id)}
               onSubmit={(input) => {
-                submitReview(order.id, reviewing.id, input);
+                submitReview(orderId, reviewing.id, input);
                 setReviewing(null);
               }}
               onCancel={() => setReviewing(null)}

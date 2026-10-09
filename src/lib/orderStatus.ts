@@ -4,7 +4,9 @@ const toneByStatus: Record<string, StatusTone> = {
   delivered: "success",
   shipped: "info",
   processing: "accent",
+  confirmed: "accent",
   pending: "warning",
+  cancelled: "danger",
 };
 
 /** Maps an order status from the API to its badge colour. */
