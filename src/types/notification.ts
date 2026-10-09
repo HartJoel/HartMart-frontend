@@ -1,8 +1,14 @@
+/** `GET /notification`, `GET /notification/:id` — confirmed from live responses. */
 export type Notification = {
-  id: number;
+  id: string;
+  userId: string;
+  type: string;
   title: string;
-  body: string;
-  /** ISO timestamp. */
+  message: string;
+  /** A frontend route to navigate to when the notification is clicked, e.g. "/orders/:id". */
+  actionUrl: string | null;
+  isRead: boolean;
+  readAt: string | null;
+  metadata: Record<string, unknown> | null;
   createdAt: string;
-  read: boolean;
 };

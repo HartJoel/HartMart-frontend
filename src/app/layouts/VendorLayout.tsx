@@ -3,11 +3,11 @@ import PageTransition from "@/components/PageTransition";
 import WorkspaceSidebar, { type WorkspaceNavItem } from "@/components/WorkspaceSidebar";
 import { useVendorProfile } from "@/features/vendor-dashboard/api";
 import NotificationBell from "@/features/notifications/components/NotificationBell";
-import { useNotifications } from "@/features/notifications/NotificationsContext";
+import { useUnreadNotificationsCount } from "@/features/notifications/api";
 import { getInitials } from "@/lib/format";
 
 export default function VendorLayout() {
-  const { unreadCount } = useNotifications();
+  const unreadCount = useUnreadNotificationsCount();
   const { data: vendor } = useVendorProfile();
   const storeName = vendor?.storeName ?? "Your store";
   const storeInitials = vendor ? getInitials(vendor.storeName) : "··";

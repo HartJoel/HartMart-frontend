@@ -1,10 +1,10 @@
 import { Link } from "react-router";
 import Icon from "@/components/Icon";
-import { useNotifications } from "@/features/notifications/NotificationsContext";
+import { useUnreadNotificationsCount } from "@/features/notifications/api";
 
 /** Header bell for the vendor and admin areas, with the unread count. */
 export default function NotificationBell({ to }: { to: string }) {
-  const { unreadCount } = useNotifications();
+  const unreadCount = useUnreadNotificationsCount();
   const label = unreadCount ? `Notifications, ${unreadCount} unread` : "Notifications";
 
   return (

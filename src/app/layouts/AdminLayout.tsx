@@ -2,14 +2,14 @@ import { Outlet, useLocation } from "react-router";
 import PageTransition from "@/components/PageTransition";
 import WorkspaceSidebar, { type WorkspaceNavItem } from "@/components/WorkspaceSidebar";
 import NotificationBell from "@/features/notifications/components/NotificationBell";
-import { useNotifications } from "@/features/notifications/NotificationsContext";
+import { useUnreadNotificationsCount } from "@/features/notifications/api";
 import { cn } from "@/lib/cn";
 import { getInitials } from "@/lib/format";
 import { sessionUser } from "@/lib/mock/session";
 
 export default function AdminLayout() {
   const { pathname } = useLocation();
-  const { unreadCount } = useNotifications();
+  const unreadCount = useUnreadNotificationsCount();
   // The audit log is a wide table, so it drops the content width cap.
   const isLogs = pathname === "/admin/logs";
 

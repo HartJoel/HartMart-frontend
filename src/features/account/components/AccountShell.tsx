@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { NavLink, useNavigate } from "react-router";
 import { useLogout } from "@/features/auth/api";
 import RoleSwitcher from "@/features/auth/components/RoleSwitcher";
-import { useNotifications } from "@/features/notifications/NotificationsContext";
+import { useUnreadNotificationsCount } from "@/features/notifications/api";
 import { cn } from "@/lib/cn";
 
 const navigation = [
@@ -14,7 +14,7 @@ const navigation = [
 
 /** Sidebar layout shared by the account pages: profile, addresses, orders and notifications. */
 export default function AccountShell({ children }: { children: ReactNode }) {
-  const { unreadCount } = useNotifications();
+  const unreadCount = useUnreadNotificationsCount();
   const logout = useLogout();
   const navigate = useNavigate();
 

@@ -5,7 +5,7 @@ import Brand from "@/components/Brand";
 import { buttonClasses } from "@/components/Button";
 import Icon, { type IconName } from "@/components/Icon";
 import { useAuthStore } from "@/features/auth/store";
-import { useNotifications } from "@/features/notifications/NotificationsContext";
+import { useUnreadNotificationsCount } from "@/features/notifications/api";
 import { useCart } from "@/features/cart/api";
 import { useWishlist } from "@/features/wishlist/api";
 import { cn } from "@/lib/cn";
@@ -64,7 +64,7 @@ function HeaderIconLink({
 }
 
 export default function Header() {
-  const { unreadCount } = useNotifications();
+  const unreadCount = useUnreadNotificationsCount();
   const { data: wishlist } = useWishlist();
   const savedCount = wishlist?.items?.length ?? 0;
   const { data: cart } = useCart();
