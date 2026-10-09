@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
-import { SessionProvider } from "@/features/auth/SessionContext";
 import { useAuthBootstrap } from "@/features/auth/useAuthBootstrap";
 import { NotificationsProvider } from "@/features/notifications/NotificationsContext";
 import { ReviewsProvider } from "@/features/reviews/ReviewsContext";
@@ -17,11 +16,9 @@ export default function AppProviders({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthBootstrap />
-      <SessionProvider>
-        <NotificationsProvider>
-          <ReviewsProvider>{children}</ReviewsProvider>
-        </NotificationsProvider>
-      </SessionProvider>
+      <NotificationsProvider>
+        <ReviewsProvider>{children}</ReviewsProvider>
+      </NotificationsProvider>
     </QueryClientProvider>
   );
 }

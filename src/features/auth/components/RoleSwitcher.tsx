@@ -1,17 +1,17 @@
 import { Link, useLocation } from "react-router";
 import Icon from "@/components/Icon";
-import { useSession } from "@/features/auth/SessionContext";
+import { useAuthStore } from "@/features/auth/store";
 import { cn } from "@/lib/cn";
-import type { Role } from "@/lib/mock/session";
+import type { UserRole } from "@/types/auth";
 
 /** Where each workspace starts. The customer side is the storefront at "/". */
-const workspaces: Record<Exclude<Role, "CUSTOMER">, { label: string; home: string }> = {
-  VENDOR: { label: "Vendor", home: "/vendor/dashboard" },
+const workspaces: Record<Exclude<UserRole, "CUSTOMER">, { label: string; home: string }> = {
+  VENDOR: { label: "Vendor dashboard", home: "/vendor/dashboard" },
   ADMIN: { label: "Admin", home: "/admin" },
 };
 
 /** The area a path belongs to. Storefront, account and order pages all count as customer. */
-export function activeRoleFor(pathname: string): Role {
+export function activeRoleFor(pathname: string): UserRole {
   if (pathname.startsWith("/vendor")) return "VENDOR";
   if (pathname.startsWith("/admin")) return "ADMIN";
   return "CUSTOMER";
@@ -27,7 +27,7 @@ type RoleSwitcherProps = {
  * vendor or admin workspace you hold, and from a workspace you go back to the customer side.
  */
 export default function RoleSwitcher({ tone = "dark", className }: RoleSwitcherProps) {
-  const { roles } = useSession();
+  const role = useAuthStore((state) => state.user?.role);
   const { pathname } = useLocation();
   const active = activeRoleFor(pathname);
   const dark = tone === "dark";
@@ -48,17 +48,18 @@ export default function RoleSwitcher({ tone = "dark", className }: RoleSwitcherP
     );
   }
 
-  const targets = (Object.keys(workspaces) as Array<keyof typeof workspaces>).filter((role) => roles.includes(role));
-  if (targets.length === 0) return null;
+  const target = role === "ADMIN"
+    ? { label: workspaces.ADMIN.label, home: workspaces.ADMIN.home }
+    : role === "VENDOR"
+      ? { label: workspaces.VENDOR.label, home: workspaces.VENDOR.home }
+      : { label: "Become a vendor", home: "/become-a-vendor" };
 
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
-      {targets.map((role) => (
-        <Link key={role} to={workspaces[role].home} className={linkClass}>
-          Switch to {workspaces[role].label.toLowerCase()}
-          <Icon name="arrow" size={14} />
-        </Link>
-      ))}
+    <div className={cn("flex", className)}>
+      <Link to={target.home} className={linkClass}>
+        {target.label}
+        <Icon name="arrow" size={14} />
+      </Link>
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { Link, NavLink, useNavigate } from "react-router";
 import Brand from "@/components/Brand";
 import { buttonClasses } from "@/components/Button";
 import Icon, { type IconName } from "@/components/Icon";
-import { useSession } from "@/features/auth/SessionContext";
+import { useAuthStore } from "@/features/auth/store";
 import { useNotifications } from "@/features/notifications/NotificationsContext";
 import { useCart } from "@/features/cart/api";
 import { useWishlist } from "@/features/wishlist/api";
@@ -69,7 +69,7 @@ export default function Header() {
   const savedCount = wishlist?.items?.length ?? 0;
   const { data: cart } = useCart();
   const itemCount = cart?.itemCount ?? 0;
-  const { roles } = useSession();
+  const role = useAuthStore((state) => state.user?.role);
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
 
@@ -98,7 +98,20 @@ export default function Header() {
         />
       </form>
       <nav aria-label="Primary" className="ml-auto flex items-center gap-2 max-[600px]:gap-1">
-        {roles.includes("VENDOR") ? (
+        {role === "ADMIN" ? (
+          <Link
+            to="/admin"
+            aria-label="Admin"
+            className={buttonClasses({
+              variant: "ghost",
+              size: "sm",
+              className: "mr-3 max-[900px]:min-h-10 max-[900px]:px-3 max-[600px]:mr-1",
+            })}
+          >
+            <Icon name="users" size={16} />
+            <span className="max-[900px]:sr-only">Admin</span>
+          </Link>
+        ) : role === "VENDOR" ? (
           <Link
             to="/vendor/dashboard"
             aria-label="Vendor dashboard"
@@ -123,20 +136,6 @@ export default function Header() {
           >
             <Icon name="vendors" size={16} />
             <span className="max-[900px]:sr-only">Become a vendor</span>
-          </Link>
-        )}
-        {roles.includes("ADMIN") && (
-          <Link
-            to="/admin"
-            aria-label="Admin"
-            className={buttonClasses({
-              variant: "ghost",
-              size: "sm",
-              className: "mr-3 max-[900px]:min-h-10 max-[900px]:px-3 max-[600px]:mr-1",
-            })}
-          >
-            <Icon name="users" size={16} />
-            <span className="max-[900px]:sr-only">Admin</span>
           </Link>
         )}
         {navItems.map((item) => (
