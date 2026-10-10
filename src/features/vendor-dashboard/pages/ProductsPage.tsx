@@ -13,6 +13,7 @@ import StockAdjustModal from "@/features/vendor-dashboard/components/StockAdjust
 import { useDeleteProduct, useVendorProducts } from "@/features/vendor-dashboard/api";
 import { formatNaira } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { firstImageUrl } from "@/lib/images";
 import type { VendorProduct } from "@/types/product";
 
 const selectClass = "min-h-[46px] rounded-hm-sm border-0 bg-hm-surface px-3 text-[10px] outline-0";
@@ -146,13 +147,14 @@ export default function ProductsPage() {
               : filtered.map((product) => {
                   const isLowStock = product.availableStock > 0 && product.availableStock <= product.reorderLevel;
                   const isOutOfStock = product.availableStock === 0;
+                  const productImage = firstImageUrl(product.images);
 
                   return (
                     <tr key={product.id} className={cn(isLowStock && "bg-[#fffcf7] shadow-[inset_3px_0_#c18a25]")}>
                       <td className={tableCell}>
                         <div className="flex items-center gap-3">
-                          {product.images[0] ? (
-                            <img className="size-11 rounded-[9px] object-cover" src={product.images[0].url} alt="" />
+                          {productImage ? (
+                            <img className="size-11 rounded-[9px] object-cover" src={productImage} alt="" />
                           ) : (
                             <span className="grid size-11 place-items-center rounded-[9px] bg-hm-field text-hm-muted">
                               <Icon name="shop" size={16} />

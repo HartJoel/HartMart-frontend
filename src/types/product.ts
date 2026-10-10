@@ -1,3 +1,5 @@
+import type { ProductImage } from "@/lib/images";
+
 export type Product = {
   id: number;
   name: string;
@@ -31,7 +33,7 @@ export type VendorProduct = {
   availableStock: number;
   reservedStock: number;
   reorderLevel: number;
-  images: { url: string; publicId: string }[];
+  images: ProductImage[];
   weight: string | null;
   dimensions: string | null;
   /** Seen as an object, a JSON-encoded string, and `{}` across existing records — not rendered anywhere yet. */
@@ -72,7 +74,7 @@ export type CatalogProduct = {
   basePrice: string;
   discountPrice: string | null;
   currency: string;
-  images: { url: string; publicId: string }[];
+  images: ProductImage[];
   averageRating: number;
   status: string;
   availableStock: number;

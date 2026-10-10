@@ -34,16 +34,16 @@ export default function VendorSpotlight() {
           </Button>
         </div>
       ) : isPending ? (
-        <div className="grid grid-cols-4 gap-4 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
+        <div className="flex gap-4 overflow-auto scrollbar-none">
           {Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className="h-[220px] animate-pulse rounded-hm-md bg-hm-field" />
+            <div key={index} className="h-[220px] w-70 shrink-0 animate-pulse rounded-hm-md bg-hm-field" />
           ))}
         </div>
       ) : (
-        <RevealGroup className="grid grid-cols-4 gap-4 max-[900px]:grid-cols-2 max-[600px]:grid-cols-1">
+        <RevealGroup className="flex gap-4 overflow-auto scrollbar-none">
           {vendors?.map((vendor) => (
-            <RevealItem key={vendor.id} className="flex">
-              <VendorCard vendor={vendor} from={[]} className="flex-1" />
+            <RevealItem key={vendor.id} className="w-70 shrink-0">
+              <VendorCard vendor={vendor} from={[]} className="h-full" />
             </RevealItem>
           ))}
         </RevealGroup>

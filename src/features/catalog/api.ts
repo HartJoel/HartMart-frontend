@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest, type PaginationMeta } from "@/lib/api/client";
+import { firstImageUrl } from "@/lib/images";
 import type { Category } from "@/types/category";
 import type { CatalogProduct, VendorProduct } from "@/types/product";
 
@@ -61,7 +62,7 @@ export function toCardProduct(product: CatalogProduct) {
     id: product.id,
     name: product.name,
     price: Number(product.discountPrice ?? product.basePrice),
-    image: product.images[0]?.url ?? "",
+    image: firstImageUrl(product.images) ?? "",
     availableStock: product.availableStock,
   };
 }

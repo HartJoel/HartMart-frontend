@@ -31,7 +31,7 @@ export default function AccountShell({ children }: { children: ReactNode }) {
       <div className="flex flex-col pt-20 max-[600px]:pt-5">
         <RoleSwitcher tone="light" className="mb-4 max-[600px]:mb-3" />
 
-        <nav aria-label="Account" className="flex flex-col max-[600px]:flex-row max-[600px]:overflow-x-auto">
+        <nav aria-label="Account" className="flex flex-col max-[600px]:flex-row max-[600px]:overflow-x-auto scrollbar-none">
           {navigation.map((item) => (
             <NavLink
               key={item.to}

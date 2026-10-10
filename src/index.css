@@ -46,3 +46,16 @@
     }
   }
 }
+
+@layer utilities {
+  /* Keeps horizontal drag/scroll (category rail, filter rail) working
+     without showing the scrollbar track across browsers. */
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}

@@ -13,6 +13,7 @@ import { useVendor } from "@/features/vendor-storefront/api";
 import type { VendorOriginState } from "@/features/vendor-storefront/vendorOrigin";
 import { useAddToWishlist, useRemoveFromWishlist, useWishlistCheck } from "@/features/wishlist/api";
 import { formatNaira, getInitials } from "@/lib/format";
+import { imageUrl } from "@/lib/images";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -60,7 +61,8 @@ export default function ProductDetailPage() {
   }
 
   const inStock = product.availableStock > 0;
-  const images = product.images.length > 0 ? product.images : null;
+  const imageUrls = product.images.map(imageUrl).filter((url): url is string => Boolean(url));
+  const images = imageUrls.length > 0 ? imageUrls : null;
   const price = product.discountPrice ? Number(product.discountPrice) : Number(product.basePrice);
 
   const productId = product.id;
@@ -86,7 +88,7 @@ export default function ProductDetailPage() {
           {images ? (
             <img
               className="block aspect-square w-full rounded-hm-md object-cover"
-              src={images[0].url}
+              src={images[0]}
               alt={product.name}
             />
           ) : (
@@ -97,7 +99,7 @@ export default function ProductDetailPage() {
           <div className="mt-3 grid grid-cols-4 gap-2.5">
             {[0, 1, 2, 3].map((n) =>
               images && images[n] ? (
-                <img className="aspect-square w-full rounded-[10px] object-cover" src={images[n].url} alt="" key={n} />
+                <img className="aspect-square w-full rounded-[10px] object-cover" src={images[n]} alt="" key={n} />
               ) : (
                 <span key={n} className="grid aspect-square w-full place-items-center rounded-[10px] bg-hm-field text-hm-muted">
                   <Icon name="shop" size={16} />

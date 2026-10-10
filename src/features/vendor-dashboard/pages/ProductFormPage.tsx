@@ -4,6 +4,7 @@ import Button from "@/components/Button";
 import PageHeader from "@/components/PageHeader";
 import ProductForm from "@/features/vendor-dashboard/components/ProductForm";
 import { useCategories, useCreateProduct, useProduct, useUpdateProduct } from "@/features/vendor-dashboard/api";
+import { imageUrl } from "@/lib/images";
 import type { VendorProductInput } from "@/types/product";
 
 export default function ProductFormPage() {
@@ -67,7 +68,11 @@ export default function ProductFormPage() {
       ) : (
         <ProductForm
           categories={categories ?? []}
-          existingImages={isEditing ? product?.images.map((image) => image.url) : undefined}
+          existingImages={
+            isEditing
+              ? product?.images.map(imageUrl).filter((url): url is string => Boolean(url))
+              : undefined
+          }
           initial={
             product
               ? {

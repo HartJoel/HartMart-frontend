@@ -11,6 +11,7 @@ import { useRespondToReview, useReviewsForProducts } from "@/features/reviews/ap
 import { useVendorProducts } from "@/features/vendor-dashboard/api";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { firstImageUrl } from "@/lib/images";
 import type { Review } from "@/types/review";
 import type { VendorProduct } from "@/types/product";
 
@@ -131,10 +132,12 @@ function VendorReviewRow({ review, product }: { review: Review; product: VendorP
     respond.mutate({ id: review.id, response: response.trim() }, { onSuccess: () => setEditing(false) });
   }
 
+  const productImage = firstImageUrl(product?.images);
+
   return (
     <li className="grid grid-cols-[64px_1fr] gap-4 rounded-hm-md bg-hm-surface p-6">
-      {product?.images[0] ? (
-        <img className="size-16 rounded-[10px] bg-hm-field object-cover" src={product.images[0].url} alt="" />
+      {productImage ? (
+        <img className="size-16 rounded-[10px] bg-hm-field object-cover" src={productImage} alt="" />
       ) : (
         <div className="size-16 rounded-[10px] bg-hm-field" />
       )}

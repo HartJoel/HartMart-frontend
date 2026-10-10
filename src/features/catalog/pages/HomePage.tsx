@@ -45,7 +45,7 @@ export default function HomePage() {
           <div className={sectionHeadClass}>
             <h2 className="m-0 text-[32px] tracking-[-0.045em]">Shop by category</h2>
           </div>
-          <RevealGroup className="flex gap-7 overflow-auto">
+          <RevealGroup className="flex gap-7 overflow-auto scrollbar-none">
             {categoriesPending
               ? Array.from({ length: 6 }).map((_, index) => (
                   <div key={index} className="flex min-w-max shrink-0 items-center gap-2.5">

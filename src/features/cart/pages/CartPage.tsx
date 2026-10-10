@@ -9,6 +9,7 @@ import QuantityStepper from "@/components/QuantityStepper";
 import ResultScreen from "@/components/ResultScreen";
 import { useCart, useClearCart, useRemoveCartItem, useUpdateCartItem, type CartLineItem } from "@/features/cart/api";
 import { formatNaira } from "@/lib/format";
+import { firstImageUrl } from "@/lib/images";
 
 export default function CartPage() {
   const { data: cart, isPending, isError, refetch } = useCart();
@@ -81,6 +82,7 @@ export default function CartPage() {
           {items.map((item) => {
             const price = Number(item.product.discountPrice ?? item.product.basePrice);
             const isPendingItem = pendingId === item.id && updateCartItem.isPending;
+            const imageSrc = firstImageUrl(item.product.images);
 
             return (
               <article
@@ -88,10 +90,10 @@ export default function CartPage() {
                 className="grid grid-cols-[120px_1fr_auto_100px_30px] items-center gap-[18px] border-t border-hm-border py-5 max-[600px]:grid-cols-[82px_1fr_30px]"
               >
                 <Link to={`/products/${item.productId}`} className="shrink-0 max-[600px]:row-span-2">
-                  {item.product.images[0] ? (
+                  {imageSrc ? (
                     <img
                       className="aspect-square w-[120px] rounded-hm-sm object-cover max-[600px]:w-[82px]"
-                      src={item.product.images[0].url}
+                      src={imageSrc}
                       alt=""
                     />
                   ) : (

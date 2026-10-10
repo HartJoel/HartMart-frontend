@@ -11,11 +11,10 @@ import { useWishlist } from "@/features/wishlist/api";
 import { cn } from "@/lib/cn";
 import { useMotionPresets } from "@/lib/motion";
 
-/** `hideOnMobile` keeps the header within a 320px-wide screen; these links stay reachable from the page body and Account. */
+/** `hideOnMobile` keeps the header within a 320px-wide screen; these links stay reachable from the page body. */
 const navItems: Array<{ to: string; label: string; icon: IconName; hideOnMobile?: boolean }> = [
-  { to: "/products", label: "Shop", icon: "shop", hideOnMobile: true },
+  { to: "/products", label: "Shop", icon: "shop" },
   { to: "/orders", label: "Orders", icon: "orders", hideOnMobile: true },
-  { to: "/account", label: "Account", icon: "account" },
 ];
 
 /** Icon-only nav entry. The label is kept as aria-label and tooltip. */
@@ -25,12 +24,15 @@ function HeaderIconLink({
   icon,
   badge,
   hideOnMobile,
+  badgeMobileOnly,
 }: {
   to: string;
   label: string;
   icon: IconName;
   badge?: string;
   hideOnMobile?: boolean;
+  /** Shows the badge only below 600px — used to surface the unread count on Account once the bell itself is hidden there. */
+  badgeMobileOnly?: boolean;
 }) {
   const { reduce } = useMotionPresets();
 
@@ -54,7 +56,12 @@ function HeaderIconLink({
       >
         <Icon name={icon} size={19} />
         {badge && (
-          <span className="absolute -top-0.5 -right-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-hm-accent px-1 text-[9px] font-[650] text-white">
+          <span
+            className={cn(
+              "absolute -top-0.5 -right-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-hm-accent px-1 text-[9px] font-[650] text-white",
+              badgeMobileOnly && "hidden max-[600px]:grid",
+            )}
+          >
             {badge}
           </span>
         )}
@@ -152,6 +159,14 @@ export default function Header() {
           label={unreadCount ? `Notifications, ${unreadCount} unread` : "Notifications"}
           icon="bell"
           badge={unreadCount ? String(unreadCount) : undefined}
+          hideOnMobile
+        />
+        <HeaderIconLink
+          to="/account"
+          label={unreadCount ? `Account, ${unreadCount} unread notifications` : "Account"}
+          icon="account"
+          badge={unreadCount ? String(unreadCount) : undefined}
+          badgeMobileOnly
         />
         <HeaderIconLink
           to="/wishlist"

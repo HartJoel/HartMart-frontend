@@ -11,6 +11,7 @@ import { useAddToCart } from "@/features/cart/api";
 import type { VendorOriginState } from "@/features/vendor-storefront/vendorOrigin";
 import { useRemoveFromWishlist, useWishlist } from "@/features/wishlist/api";
 import { formatNaira } from "@/lib/format";
+import { firstImageUrl } from "@/lib/images";
 
 export default function WishlistPage() {
   const { data: wishlist, isPending, isError, refetch } = useWishlist();
@@ -69,13 +70,14 @@ export default function WishlistPage() {
           {saved.map((item) => {
             const product = item.product;
             const price = Number(product.discountPrice ?? product.basePrice);
+            const productImage = firstImageUrl(product.images);
 
             return (
               <RevealItem key={item.id}>
                 <article className="flex flex-wrap items-center gap-5 border-t border-hm-border py-5">
                   <Link to={`/products/${product.id}`} className="shrink-0">
-                    {product.images[0] ? (
-                      <img className="aspect-square w-24 rounded-hm-sm object-cover" src={product.images[0].url} alt="" />
+                    {productImage ? (
+                      <img className="aspect-square w-24 rounded-hm-sm object-cover" src={productImage} alt="" />
                     ) : (
                       <span className="grid aspect-square w-24 place-items-center rounded-hm-sm bg-hm-field text-hm-muted">
                         <Icon name="shop" size={20} />

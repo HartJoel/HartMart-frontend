@@ -114,7 +114,7 @@ export default function ProductsPage() {
       </div>
 
       <div className="grid grid-cols-[220px_1fr] gap-[50px] max-[900px]:grid-cols-1">
-        <aside className="flex flex-col gap-1 rounded-hm-md bg-hm-surface p-5 max-[900px]:flex-row max-[900px]:gap-2 max-[900px]:overflow-auto max-[900px]:p-3">
+        <aside className="sticky top-5 flex max-h-[calc(100vh-40px)] flex-col gap-1 overflow-y-auto rounded-hm-md bg-hm-surface p-5 scrollbar-none max-[900px]:static max-[900px]:max-h-none max-[900px]:flex-row max-[900px]:gap-2 max-[900px]:overflow-auto max-[900px]:p-3">
           <p className="m-0 mb-2 px-3 text-[10px] font-[750] tracking-[0.14em] text-hm-muted max-[900px]:hidden">
             CATEGORIES
           </p>
