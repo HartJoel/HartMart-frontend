@@ -3,7 +3,10 @@ import type { ReactNode } from "react";
 import { useMotionPresets } from "@/lib/motion";
 
 // Plays once, when the element first enters view, so scrolling back up does not replay it.
-export const revealViewport = { once: true, amount: 0.15 } as const;
+// "some" (any part visible) rather than a fixed ratio — a ratio like 0.15 can never be
+// satisfied by a tall list (e.g. a 12-row mobile product grid), which would leave it stuck
+// at opacity 0 forever.
+export const revealViewport = { once: true, amount: "some" } as const;
 
 /** Fades a block up into place the first time it scrolls into view. */
 export default function Reveal({ children, className }: { children: ReactNode; className?: string }) {
