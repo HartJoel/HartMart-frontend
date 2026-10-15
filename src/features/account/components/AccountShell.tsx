@@ -1,6 +1,8 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import { AnimatePresence } from "framer-motion";
 import { NavLink, useNavigate } from "react-router";
 import { useLogout } from "@/features/auth/api";
+import ConfirmLogoutModal from "@/features/auth/components/ConfirmLogoutModal";
 import RoleSwitcher from "@/features/auth/components/RoleSwitcher";
 import { useUnreadNotificationsCount } from "@/features/notifications/api";
 import { cn } from "@/lib/cn";
@@ -17,6 +19,7 @@ export default function AccountShell({ children }: { children: ReactNode }) {
   const unreadCount = useUnreadNotificationsCount();
   const logout = useLogout();
   const navigate = useNavigate();
+  const [confirmingLogout, setConfirmingLogout] = useState(false);
 
   async function handleLogout() {
     try {
@@ -64,7 +67,7 @@ export default function AccountShell({ children }: { children: ReactNode }) {
           ))}
           <button
             type="button"
-            onClick={handleLogout}
+            onClick={() => setConfirmingLogout(true)}
             disabled={logout.isPending}
             className="mt-3 rounded-[10px] p-3 text-left text-[13px] font-[600] text-hm-error transition-colors duration-200 hover:bg-hm-error-soft disabled:opacity-60 max-[600px]:mt-0 max-[600px]:min-w-max"
           >
@@ -74,6 +77,16 @@ export default function AccountShell({ children }: { children: ReactNode }) {
       </div>
 
       <section className="min-w-0">{children}</section>
+
+      <AnimatePresence>
+        {confirmingLogout && (
+          <ConfirmLogoutModal
+            isPending={logout.isPending}
+            onClose={() => setConfirmingLogout(false)}
+            onConfirm={handleLogout}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
